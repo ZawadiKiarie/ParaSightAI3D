@@ -27,10 +27,17 @@ function ModuleCard({ title, description, icon, gradient, path }) {
 
         {/* Button */}
         <button
-          onClick={() => navigate(path)}
-          className={`w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r ${gradient} text-white font-medium shadow-md hover:shadow-lg transition-all duration-300 hover:scale-[1.02]`}
+          onClick={() => {
+            if (path) navigate(path);
+          }}
+          disabled={!path}
+          className={`w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r ${gradient} text-white font-medium shadow-md transition-all duration-300 ${
+            path
+              ? "hover:shadow-lg hover:scale-[1.02] cursor-pointer"
+              : "opacity-60 cursor-not-allowed"
+          }`}
         >
-          Open
+          {path ? "Open" : "Coming Soon"}
           <ArrowRight className="w-4 h-4" />
         </button>
       </div>
@@ -53,7 +60,7 @@ export function ModuleGrid() {
       description: "Explore parasite structures and diagnostic features in 3D",
       icon: <Box className="w-8 h-8 text-white" />,
       gradient: "from-purple-500 to-pink-500",
-      path: "",
+      path: null,
     },
     {
       title: "Lab Simulation",
@@ -61,7 +68,7 @@ export function ModuleGrid() {
         "Experience simulated diagnostic workflows in a lab-like environment",
       icon: <Microscope className="w-8 h-8 text-white" />,
       gradient: "from-indigo-500 to-blue-500",
-      path: "",
+      path: "/labsimulation",
     },
     {
       title: "Reports",

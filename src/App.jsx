@@ -12,6 +12,7 @@ import { DetectionResults } from "./pages/DetectionResults";
 import ThreeDView from "./pages/3DView";
 import ReportsList from "./pages/ReportList";
 import ReportDetails from "./pages/ReportDetails";
+import { LabSimulation } from "./pages/LabSimulation";
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
           <Route path="/3dview" element={<ThreeDView />} />
           <Route path="/reports" element={<ReportsList />} />
           <Route path="/reports/:id" element={<ReportDetails />} />
+          <Route path="/labsimulation" element={<LabSimulation />} />
         </Routes>
       </Router>
     </>

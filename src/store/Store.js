@@ -11,3 +11,5 @@ export const userAtom = atom(
         email: "",
       },
 );
+
+export const isLoadingScreenComplete = atom(false);

@@ -12,7 +12,7 @@ export default function Dashboard() {
       <DashboardHeader />
 
       {/* Main Content */}
-      <main className="container mx-auto px-6 py-12">
+      <main className="relative z-10 container mx-auto px-6 py-12">
         {/* Welcome Section */}
         <div className="mb-12">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
@@ -35,9 +35,9 @@ export default function Dashboard() {
       </main>
 
       {/* Decorative Elements */}
-      <div className="fixed top-20 right-20 w-96 h-96 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob" />
-      <div className="fixed bottom-20 left-20 w-96 h-96 bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000" />
-      <div className="fixed top-1/2 left-1/2 w-96 h-96 bg-pink-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000" />
+      <div className="fixed top-20 right-20 w-96 h-96 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob pointer-events-none -z-0" />
+      <div className="fixed bottom-20 left-20 w-96 h-96 bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000 pointer-events-none -z-0" />
+      <div className="fixed top-1/2 left-1/2 w-96 h-96 bg-pink-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000 pointer-events-none -z-0" />
     </div>
   );
 }
