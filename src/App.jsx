@@ -13,6 +13,7 @@ import ThreeDView from "./pages/3DView";
 import ReportsList from "./pages/ReportList";
 import ReportDetails from "./pages/ReportDetails";
 import { LabSimulation } from "./pages/LabSimulation";
+import GuidedLearning from "./pages/guidedlearning";
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
           <Route path="/reports" element={<ReportsList />} />
           <Route path="/reports/:id" element={<ReportDetails />} />
           <Route path="/labsimulation" element={<LabSimulation />} />
+          <Route path="/guidedlearning" element={<GuidedLearning />} />
         </Routes>
       </Router>
     </>

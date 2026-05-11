@@ -465,7 +465,10 @@ export default function ThreeDView() {
 
             {/* Action Area */}
             <div className="space-y-3">
-              <button className="w-full flex items-center justify-center bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-semibold py-6 text-lg shadow-lg shadow-indigo-500/30 rounded-lg transition-all">
+              <button
+                onClick={() => navigate("/guidedlearning")}
+                className="w-full flex items-center justify-center bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-semibold py-6 text-lg shadow-lg shadow-indigo-500/30 rounded-lg transition-all"
+              >
                 <Play className="h-5 w-5 mr-2" />
                 Start Guided Learning
               </button>

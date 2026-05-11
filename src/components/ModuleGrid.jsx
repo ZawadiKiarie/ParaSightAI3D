@@ -60,7 +60,7 @@ export function ModuleGrid() {
       description: "Explore parasite structures and diagnostic features in 3D",
       icon: <Box className="w-8 h-8 text-white" />,
       gradient: "from-purple-500 to-pink-500",
-      path: null,
+      path: "/guidedlearning",
     },
     {
       title: "Lab Simulation",
