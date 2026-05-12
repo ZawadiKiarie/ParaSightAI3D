@@ -30,6 +30,10 @@ export function Model8({
   onAddSample,
   onApplyStain,
 
+  microscopeActive = false,
+  microscopeCompleted = false,
+  onOpenMicroscope,
+
   ...props
 }) {
   const { scene } = useGLTF("/models/labV8-v1.glb");
@@ -62,6 +66,9 @@ export function Model8({
   const dropRef = useRef();
   const sampleBottleRef = useRef();
   const stainBottleRef = useRef();
+
+  const microscopeRef = useRef();
+  const microscopeGlowRef = useRef();
 
   const dropBaseScale = useRef(new THREE.Vector3(1, 1, 1));
   const samplePrepOriginalMaterials = useRef({});
@@ -146,6 +153,20 @@ export function Model8({
     [],
   );
 
+  const microscopeGlowMat = useMemo(
+    () =>
+      new THREE.MeshBasicMaterial({
+        color: 0x66ffff,
+        transparent: true,
+        opacity: 0.55,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        side: THREE.DoubleSide,
+        toneMapped: false,
+      }),
+    [],
+  );
+
   const textures = useTexture({
     TexturePackOne: "/textures/TexturePackOne.webp",
     TexturePackTwo: "/textures/TexturePackTwo.webp",
@@ -189,6 +210,10 @@ export function Model8({
       }
 
       if (n.includes("bottomslideglow")) {
+        return;
+      }
+
+      if (n.includes("microscopeglow")) {
         return;
       }
 
@@ -398,6 +423,14 @@ export function Model8({
     document.body.style.cursor = "default";
   };
 
+  const handleMicroscopeClick = (event) => {
+    event.stopPropagation();
+
+    if (samplePrepCompleted && !microscopeCompleted && onOpenMicroscope) {
+      onOpenMicroscope();
+    }
+  };
+
   useFrame((state, delta) => {
     if (!characterGroup.current) return;
 
@@ -414,6 +447,19 @@ export function Model8({
 
       state.camera.position.lerp(benchCameraPosition, 0.045);
       state.camera.lookAt(benchCameraTarget);
+    } else if (microscopeActive) {
+      playerVelocity.current.x = 0;
+      playerVelocity.current.z = 0;
+
+      if (animation !== "Idle") {
+        setAnimation("Idle");
+      }
+
+      const microscopeCameraPosition = new THREE.Vector3(51.5, 7.2, 17.2);
+      const microscopeCameraTarget = new THREE.Vector3(49.2, 3.1, 13.1);
+
+      state.camera.position.lerp(microscopeCameraPosition, 0.045);
+      state.camera.lookAt(microscopeCameraTarget);
     } else {
       const look = lookInput.current;
       const move = moveInput.current;
@@ -621,6 +667,20 @@ export function Model8({
 
       dropRef.current.scale.setScalar(nextScale);
       dropRef.current.visible = nextScale > 0.01;
+    }
+
+    if (microscopeGlowRef.current) {
+      const shouldShowMicroscopeGlow =
+        samplePrepCompleted && !microscopeActive && !microscopeCompleted;
+
+      microscopeGlowRef.current.visible = shouldShowMicroscopeGlow;
+
+      if (shouldShowMicroscopeGlow) {
+        microscopeGlowRef.current.material.opacity = 0.22 + pulse * 0.55;
+
+        const glowScale = 1.01 + pulse * 0.035;
+        microscopeGlowRef.current.scale.set(glowScale, glowScale, glowScale);
+      }
     }
   });
 
@@ -1021,11 +1081,34 @@ export function Model8({
       />
 
       <mesh
+        ref={microscopeRef}
         name="Microscope_four"
         geometry={nodes.Microscope_four.geometry}
         material={nodes.Microscope_four.material}
         position={[28.494, 2.912, 13]}
         rotation={[0, -1.571, 0]}
+        onClick={handleMicroscopeClick}
+        onPointerOver={
+          samplePrepCompleted && !microscopeCompleted
+            ? handlePointerCursor
+            : undefined
+        }
+        onPointerOut={
+          samplePrepCompleted && !microscopeCompleted
+            ? handlePointerOutCursor
+            : undefined
+        }
+      />
+
+      <mesh
+        ref={microscopeGlowRef}
+        name="MicroscopeGlow"
+        geometry={nodes.Microscope_four.geometry}
+        material={microscopeGlowMat}
+        position={[28.494, 2.912, 13]}
+        rotation={[0, -1.571, 0]}
+        visible={samplePrepCompleted && !microscopeCompleted}
+        renderOrder={25}
       />
 
       <mesh

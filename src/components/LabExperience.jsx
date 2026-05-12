@@ -16,6 +16,10 @@ export const LabExperience = memo(
     onStartSamplePrep,
     onAddSample,
     onApplyStain,
+
+    microscopeActive,
+    microscopeCompleted,
+    onOpenMicroscope,
   }) => {
     return (
       <>
@@ -34,6 +38,9 @@ export const LabExperience = memo(
           onStartSamplePrep={onStartSamplePrep}
           onAddSample={onAddSample}
           onApplyStain={onApplyStain}
+          microscopeActive={microscopeActive}
+          microscopeCompleted={microscopeCompleted}
+          onOpenMicroscope={onOpenMicroscope}
         />
       </>
     );
