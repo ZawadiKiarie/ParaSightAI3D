@@ -33,6 +33,18 @@ export const LabExperience = memo(
     aiPanelOpen,
     aiCompleted,
     onOpenAIAnalysis,
+
+    chamberInfoPanelOpen,
+    chamberControlsPanelOpen,
+    selectedFeatureId,
+    modelRotationY,
+    modelZoom,
+    onOpenChamberInfo,
+    onOpenChamberControls,
+
+    learningPanelOpen,
+    learningCompleted,
+    onOpenLearningPanel,
   }) => {
     return (
       <>
@@ -65,6 +77,16 @@ export const LabExperience = memo(
           aiPanelOpen={aiPanelOpen}
           aiCompleted={aiCompleted}
           onOpenAIAnalysis={onOpenAIAnalysis}
+          chamberInfoPanelOpen={chamberInfoPanelOpen}
+          chamberControlsPanelOpen={chamberControlsPanelOpen}
+          selectedFeatureId={selectedFeatureId}
+          modelRotationY={modelRotationY}
+          modelZoom={modelZoom}
+          onOpenChamberInfo={onOpenChamberInfo}
+          onOpenChamberControls={onOpenChamberControls}
+          learningPanelOpen={learningPanelOpen}
+          learningCompleted={learningCompleted}
+          onOpenLearningPanel={onOpenLearningPanel}
         />
       </>
     );

@@ -3,6 +3,8 @@ import { LabExperience } from "../components/LabExperience";
 import { useRef, useState, useCallback, useEffect } from "react";
 import { LoadingScreen } from "../components/LoadingScreen";
 import { X } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { PARASITE_DATA } from "../components/ParasiteConfig";
 
 const STATION_CONTENT = {
   samplePrep: {
@@ -861,6 +863,382 @@ function AIAnalysisPanel({
   );
 }
 
+function ChamberInfoPanel({ aiDetectionResult, features, onClose }) {
+  return (
+    <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/45 backdrop-blur-sm px-4 py-6">
+      <div className="relative w-[82vw] max-w-4xl max-h-[88vh] overflow-hidden bg-black/80 border border-white/10 shadow-2xl text-white">
+        <button
+          onClick={onClose}
+          className="absolute top-5 right-5 z-10 text-white/60 hover:text-white transition"
+        >
+          <X size={22} />
+        </button>
+
+        <div className="max-h-[88vh] overflow-y-auto p-8">
+          <p className="text-cyan-200/70 text-xs tracking-[0.35em] uppercase mb-4">
+            3D Chamber / AI Result
+          </p>
+
+          <h2 className="text-3xl font-light tracking-[0.15em] uppercase mb-6">
+            Parasite Result Summary
+          </h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8">
+            <div className="border border-cyan-200/20 bg-cyan-300/5 p-5">
+              <p className="text-white/45 text-xs uppercase tracking-[0.2em] mb-2">
+                Detected Class
+              </p>
+              <p className="text-cyan-100 text-xl">
+                {aiDetectionResult.parasiteName}
+              </p>
+            </div>
+
+            <div className="border border-white/10 bg-white/5 p-5">
+              <p className="text-white/45 text-xs uppercase tracking-[0.2em] mb-2">
+                Stage
+              </p>
+              <p className="text-white text-xl">{aiDetectionResult.stage}</p>
+            </div>
+
+            <div className="border border-white/10 bg-white/5 p-5">
+              <p className="text-white/45 text-xs uppercase tracking-[0.2em] mb-2">
+                Confidence
+              </p>
+              <p className="text-cyan-100 text-xl">
+                {aiDetectionResult.confidence}%
+              </p>
+            </div>
+
+            <div className="border border-white/10 bg-white/5 p-5">
+              <p className="text-white/45 text-xs uppercase tracking-[0.2em] mb-2">
+                Image Location
+              </p>
+              <p className="text-white text-xl">{aiDetectionResult.location}</p>
+            </div>
+          </div>
+
+          <h3 className="text-white text-sm tracking-[0.25em] uppercase mb-4">
+            Diagnostic Features
+          </h3>
+
+          <div className="space-y-3">
+            {features.map((feature, index) => (
+              <div
+                key={feature}
+                className="flex gap-4 border border-white/10 bg-white/5 px-4 py-3"
+              >
+                <span className="text-cyan-200/70 text-sm">0{index + 1}</span>
+                <p className="text-white/75 text-sm leading-relaxed">
+                  {feature}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-8 border border-cyan-200/20 bg-cyan-300/5 p-5">
+            <p className="text-cyan-100 text-sm leading-relaxed">
+              Use the control panel on the right screen to rotate, zoom, and
+              focus on key diagnostic features in the 3D model.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ChamberControlsPanel({
+  markers,
+  selectedFeatureId,
+  setSelectedFeatureId,
+  modelRotationY,
+  setModelRotationY,
+  modelZoom,
+  setModelZoom,
+  onClose,
+}) {
+  return (
+    <div className="absolute inset-0 z-50 pointer-events-none">
+      <div className="absolute top-6 right-6 bottom-6 w-[360px] max-w-[calc(100vw-2rem)] bg-black/78 border border-white/10 backdrop-blur-md shadow-2xl text-white pointer-events-auto overflow-hidden">
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 z-10 text-white/60 hover:text-white transition"
+        >
+          <X size={20} />
+        </button>
+
+        <div className="h-full overflow-y-auto p-6 pr-8">
+          <p className="text-cyan-200/70 text-xs tracking-[0.35em] uppercase mb-3">
+            3D Chamber
+          </p>
+
+          <h2 className="text-2xl font-light tracking-[0.15em] uppercase mb-5">
+            Model Controls
+          </h2>
+
+          <div className="space-y-5 mb-7">
+            <label className="block">
+              <div className="flex justify-between text-sm mb-2">
+                <span className="text-white/70">Rotate Model</span>
+                <span className="text-white/45">{modelRotationY}°</span>
+              </div>
+
+              <input
+                type="range"
+                min="0"
+                max="360"
+                value={modelRotationY}
+                onChange={(e) => setModelRotationY(Number(e.target.value))}
+                className="w-full"
+              />
+            </label>
+
+            <label className="block">
+              <div className="flex justify-between text-sm mb-2">
+                <span className="text-white/70">Zoom</span>
+                <span className="text-white/45">{modelZoom.toFixed(1)}x</span>
+              </div>
+
+              <input
+                type="range"
+                min="0.6"
+                max="2.2"
+                step="0.1"
+                value={modelZoom}
+                onChange={(e) => setModelZoom(Number(e.target.value))}
+                className="w-full"
+              />
+            </label>
+          </div>
+
+          <h3 className="text-white text-xs tracking-[0.25em] uppercase mb-4">
+            Quick Focus
+          </h3>
+
+          <div className="space-y-3">
+            {markers.map((marker) => (
+              <button
+                key={marker.id}
+                onClick={() => setSelectedFeatureId(marker.id)}
+                className={`w-full px-4 py-3 border text-left transition ${
+                  selectedFeatureId === marker.id
+                    ? "border-cyan-200 bg-cyan-300/15 text-cyan-100"
+                    : "border-white/10 bg-white/5 text-white/70 hover:border-cyan-200/40"
+                }`}
+              >
+                <p className="text-sm">{marker.label}</p>
+                <p className="text-white/35 text-xs mt-1">{marker.id}</p>
+              </button>
+            ))}
+          </div>
+
+          {selectedFeatureId && (
+            <button
+              onClick={() => setSelectedFeatureId(null)}
+              className="mt-5 w-full px-5 py-3 border border-white/20 text-white/70 hover:bg-white hover:text-black transition"
+            >
+              Clear Focus
+            </button>
+          )}
+
+          <div className="mt-6 border border-cyan-200/20 bg-cyan-300/5 p-4">
+            <p className="text-cyan-100 text-sm leading-relaxed">
+              Use quick focus to zoom toward a diagnostic feature on the 3D
+              parasite model.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const LEARNING_CONTENT = {
+  overview: {
+    label: "Overview",
+    title: "ParaSightAI Learning Summary",
+    body: [
+      "This learning station summarizes the complete diagnostic workflow demonstrated in the virtual lab.",
+      "The process begins with preparing a microscopy slide, observing the sample under a microscope, capturing an image, analyzing it with AI, and mapping the result to a 3D parasite model.",
+      "The goal is to help users connect practical laboratory workflow with AI-assisted interpretation and interactive 3D learning.",
+    ],
+  },
+
+  diagnosticFeatures: {
+    label: "Diagnostic Features",
+    title: "Key Diagnostic Features",
+    body: [
+      "Diagnostic features are visual structures used to recognize and distinguish parasite species.",
+      "For Giardia lamblia cysts, important features include cyst shape, internal nuclei, axonemes, median bodies, and cytoplasmic structures.",
+      "In ParaSightAI, these features can be explored through 3D visualization to support better understanding than static 2D images alone.",
+    ],
+  },
+
+  lifecycle: {
+    label: "Lifecycle",
+    title: "Parasite Lifecycle Context",
+    body: [
+      "A parasite lifecycle explains how the organism moves between stages and hosts.",
+      "Understanding lifecycle stages helps users know why different parasite forms may appear in microscopy samples.",
+      "The 3D learning module can later be expanded to show stage transitions such as cyst, trophozoite, oocyst, or egg depending on the parasite.",
+    ],
+  },
+
+  comparison: {
+    label: "Comparison",
+    title: "Comparison and Interpretation",
+    body: [
+      "Parasite identification often requires comparing similar-looking organisms.",
+      "Users should compare shape, size, internal structures, number of nuclei, and other diagnostic features.",
+      "The AI result should support interpretation, while the 3D model helps the user study why a parasite class may have been suggested.",
+    ],
+  },
+};
+
+function LearningPanel({
+  activeLearningTab,
+  setActiveLearningTab,
+  onFinish,
+  onClose,
+}) {
+  const activeContent = LEARNING_CONTENT[activeLearningTab];
+
+  return (
+    <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/45 backdrop-blur-sm px-4 py-4">
+      <div className="relative w-[86vw] max-w-5xl h-[min(760px,calc(100vh-32px))] overflow-hidden bg-black/82 border border-white/10 shadow-2xl text-white">
+        <button
+          onClick={onClose}
+          className="absolute top-5 right-5 z-10 text-white/60 hover:text-white transition"
+          aria-label="Close learning panel"
+        >
+          <X size={22} />
+        </button>
+
+        <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] h-full min-h-0">
+          <div className="border-r border-white/10 bg-white/5 p-6 overflow-y-auto">
+            <p className="text-cyan-200/70 text-xs tracking-[0.35em] uppercase mb-4">
+              Station 05
+            </p>
+
+            <h2 className="text-2xl font-light tracking-[0.15em] uppercase mb-6">
+              Guided Learning
+            </h2>
+
+            <div className="space-y-3">
+              {Object.entries(LEARNING_CONTENT).map(([key, item]) => (
+                <button
+                  key={key}
+                  onClick={() => setActiveLearningTab(key)}
+                  className={`w-full px-4 py-3 border text-left transition ${
+                    activeLearningTab === key
+                      ? "border-cyan-200 bg-cyan-300/15 text-cyan-100"
+                      : "border-white/10 bg-white/5 text-white/70 hover:border-cyan-200/40"
+                  }`}
+                >
+                  <p className="text-sm tracking-[0.12em] uppercase">
+                    {item.label}
+                  </p>
+                </button>
+              ))}
+            </div>
+
+            <div className="mt-6 border border-cyan-200/20 bg-cyan-300/5 p-4">
+              <p className="text-cyan-100 text-sm leading-relaxed">
+                Select a topic to review what you learned during the virtual lab
+                workflow.
+              </p>
+            </div>
+          </div>
+
+          <div className="p-7 md:p-8 overflow-y-auto min-h-0">
+            <p className="text-cyan-200/70 text-xs tracking-[0.35em] uppercase mb-4">
+              Learning Content
+            </p>
+
+            <h3 className="text-3xl font-light tracking-[0.12em] uppercase mb-6 pr-12">
+              {activeContent.title}
+            </h3>
+
+            <div className="space-y-4">
+              {activeContent.body.map((paragraph, index) => (
+                <div
+                  key={index}
+                  className="border border-white/10 bg-white/5 p-5"
+                >
+                  <p className="text-white/75 text-sm md:text-base leading-relaxed">
+                    {paragraph}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-8 border border-cyan-200/20 bg-cyan-300/5 p-5">
+              <p className="text-cyan-100 text-sm leading-relaxed">
+                When you are done reviewing the learning content, finish the
+                session to complete the guided lab experience.
+              </p>
+            </div>
+
+            <div className="mt-6 mb-2 flex flex-wrap gap-3">
+              <button
+                onClick={onFinish}
+                className="px-6 py-3 border border-cyan-200/40 text-cyan-100 hover:bg-cyan-200 hover:text-black transition"
+              >
+                Finish Session
+              </button>
+
+              <button
+                onClick={onClose}
+                className="px-6 py-3 border border-white/25 text-white/70 hover:bg-white hover:text-black transition"
+              >
+                Continue Exploring
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function LabCompletionPopup({ onRestart, onDashboard }) {
+  return (
+    <div className="absolute inset-0 z-[60] flex items-center justify-center bg-black/55 backdrop-blur-md px-4 py-6">
+      <div className="relative w-[78vw] max-w-3xl bg-black/85 border border-cyan-200/20 shadow-2xl text-white p-8 md:p-10">
+        <p className="text-cyan-200/80 text-xs tracking-[0.35em] uppercase mb-4">
+          Session Complete
+        </p>
+
+        <h2 className="text-3xl md:text-5xl font-light tracking-[0.18em] uppercase mb-6">
+          Lab Completed
+        </h2>
+
+        <p className="text-white/75 text-base leading-relaxed mb-6">
+          You have completed the ParaSightAI virtual diagnostic workflow: sample
+          preparation, microscope observation, AI analysis, 3D visualization,
+          and guided learning.
+        </p>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-8">
+          <button
+            onClick={onRestart}
+            className="px-6 py-3 border border-cyan-200/40 text-cyan-100 hover:bg-cyan-200 hover:text-black transition"
+          >
+            Restart Lab
+          </button>
+
+          {/* <button
+            onClick={onDashboard}
+            className="px-6 py-3 border border-white/30 text-white hover:bg-white hover:text-black transition"
+          >
+            Return to Dashboard
+          </button> */}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export const LabSimulation = () => {
   const moveInputRef = useRef({ x: 0, y: 0 });
   const lookInputRef = useRef({ x: 0, y: 0 });
@@ -896,6 +1274,111 @@ export const LabSimulation = () => {
     parasiteName: "Giardia lamblia",
     confidence: 92,
     location: "central field",
+  };
+
+  const [chamberInfoPanelOpen, setChamberInfoPanelOpen] = useState(false);
+  const [chamberControlsPanelOpen, setChamberControlsPanelOpen] =
+    useState(false);
+  const [selectedFeatureId, setSelectedFeatureId] = useState(null);
+  const [modelRotationY, setModelRotationY] = useState(0);
+  const [modelZoom, setModelZoom] = useState(1);
+
+  const mappedParasite =
+    aiDetectionResult &&
+    PARASITE_DATA[aiDetectionResult.parasiteId]?.[aiDetectionResult.stage];
+
+  const mappedFeatures = mappedParasite?.features || [];
+  const mappedMarkers = mappedParasite?.markers || [];
+
+  const navigate = useNavigate();
+
+  const [labRunKey, setLabRunKey] = useState(0);
+
+  const [learningPanelOpen, setLearningPanelOpen] = useState(false);
+  const [learningCompleted, setLearningCompleted] = useState(false);
+  const [activeLearningTab, setActiveLearningTab] = useState("overview");
+  const [showCompletionPopup, setShowCompletionPopup] = useState(false);
+
+  const handleOpenLearningPanel = () => {
+    setLearningPanelOpen(true);
+    setActiveLearningTab("overview");
+  };
+
+  const handleCloseLearningPanel = () => {
+    setLearningPanelOpen(false);
+  };
+
+  const handleFinishLearningSession = () => {
+    setLearningPanelOpen(false);
+    setLearningCompleted(true);
+    setShowCompletionPopup(true);
+  };
+
+  const resetLabState = () => {
+    if (aiTimerRef.current) {
+      clearInterval(aiTimerRef.current);
+      aiTimerRef.current = null;
+    }
+
+    moveInputRef.current = { x: 0, y: 0 };
+    lookInputRef.current = { x: 0, y: 0 };
+
+    setShowWelcomeModal(false);
+    setHasShownWelcomeModal(false);
+    setActiveStation(null);
+
+    setSamplePrepStep("idle");
+    setSamplePrepPanelOpen(false);
+    setSamplePrepCompleted(false);
+
+    setMicroscopeActive(false);
+    setMicroscopeCompleted(false);
+    setMicroscopeStep("idle");
+    setMicroscopeFocus(25);
+    setMicroscopeZoom(35);
+    setMicroscopeBrightness(100);
+
+    setAiStep("idle");
+    setAiProgress(0);
+    setAiResultSaved(false);
+    setShowMappedModel(false);
+    setAiPanelOpen(false);
+    setAiCompleted(false);
+
+    setChamberInfoPanelOpen(false);
+    setChamberControlsPanelOpen(false);
+    setSelectedFeatureId(null);
+    setModelRotationY(0);
+    setModelZoom(1);
+
+    setLearningPanelOpen(false);
+    setLearningCompleted(false);
+    setActiveLearningTab("overview");
+    setShowCompletionPopup(false);
+
+    setLabRunKey((key) => key + 1);
+  };
+
+  const handleReturnToDashboard = () => {
+    navigate("/dashboard");
+  };
+
+  const handleOpenChamberInfo = () => {
+    if (!showMappedModel) return;
+    setChamberInfoPanelOpen(true);
+  };
+
+  const handleOpenChamberControls = () => {
+    if (!showMappedModel) return;
+    setChamberControlsPanelOpen(true);
+  };
+
+  const handleCloseChamberInfo = () => {
+    setChamberInfoPanelOpen(false);
+  };
+
+  const handleCloseChamberControls = () => {
+    setChamberControlsPanelOpen(false);
   };
 
   useEffect(() => {
@@ -1052,6 +1535,7 @@ export const LabSimulation = () => {
       <div className="experience relative w-screen h-screen overflow-hidden">
         <Canvas className="experience-canvas">
           <LabExperience
+            key={labRunKey}
             moveInput={moveInputRef}
             lookInput={lookInputRef}
             onPlayerMovedEnough={handlePlayerMovedEnough}
@@ -1076,6 +1560,16 @@ export const LabSimulation = () => {
             aiPanelOpen={aiPanelOpen}
             aiCompleted={aiCompleted}
             onOpenAIAnalysis={handleOpenAIAnalysis}
+            chamberInfoPanelOpen={chamberInfoPanelOpen}
+            chamberControlsPanelOpen={chamberControlsPanelOpen}
+            selectedFeatureId={selectedFeatureId}
+            modelRotationY={modelRotationY}
+            modelZoom={modelZoom}
+            onOpenChamberInfo={handleOpenChamberInfo}
+            onOpenChamberControls={handleOpenChamberControls}
+            learningPanelOpen={learningPanelOpen}
+            learningCompleted={learningCompleted}
+            onOpenLearningPanel={handleOpenLearningPanel}
           />
         </Canvas>
 
@@ -1125,23 +1619,66 @@ export const LabSimulation = () => {
           />
         )}
 
-        {!samplePrepPanelOpen && !microscopeActive && !aiPanelOpen && (
-          <>
-            <Joystick
-              side="left"
-              onChange={(v) => {
-                moveInputRef.current = v;
-              }}
-            />
-
-            <Joystick
-              side="right"
-              onChange={(v) => {
-                lookInputRef.current = v;
-              }}
-            />
-          </>
+        {chamberInfoPanelOpen && (
+          <ChamberInfoPanel
+            aiDetectionResult={aiDetectionResult}
+            features={mappedFeatures}
+            onClose={handleCloseChamberInfo}
+          />
         )}
+
+        {chamberControlsPanelOpen && (
+          <ChamberControlsPanel
+            markers={mappedMarkers}
+            selectedFeatureId={selectedFeatureId}
+            setSelectedFeatureId={setSelectedFeatureId}
+            modelRotationY={modelRotationY}
+            setModelRotationY={setModelRotationY}
+            modelZoom={modelZoom}
+            setModelZoom={setModelZoom}
+            onClose={handleCloseChamberControls}
+          />
+        )}
+
+        {learningPanelOpen && (
+          <LearningPanel
+            activeLearningTab={activeLearningTab}
+            setActiveLearningTab={setActiveLearningTab}
+            onFinish={handleFinishLearningSession}
+            onClose={handleCloseLearningPanel}
+          />
+        )}
+
+        {showCompletionPopup && (
+          <LabCompletionPopup
+            onRestart={resetLabState}
+            onDashboard={handleReturnToDashboard}
+          />
+        )}
+
+        {!samplePrepPanelOpen &&
+          !microscopeActive &&
+          !aiPanelOpen &&
+          !chamberInfoPanelOpen &&
+          !chamberControlsPanelOpen &&
+          !learningPanelOpen &&
+          !showCompletionPopup && (
+            <>
+              <Joystick
+                side="left"
+                onChange={(v) => {
+                  moveInputRef.current = v;
+                }}
+              />
+
+              <Joystick
+                side="right"
+                onChange={(v) => {
+                  lookInputRef.current = v;
+                }}
+              />
+            </>
+          )}
       </div>
     </>
   );

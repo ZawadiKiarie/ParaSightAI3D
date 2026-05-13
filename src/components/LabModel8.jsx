@@ -5,7 +5,13 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { useAnimations, useFBX, useGLTF, useTexture } from "@react-three/drei";
+import {
+  Center,
+  useAnimations,
+  useFBX,
+  useGLTF,
+  useTexture,
+} from "@react-three/drei";
 import * as THREE from "three";
 import { Octree } from "three/examples/jsm/Addons.js";
 import { Capsule } from "three/examples/jsm/Addons.js";
@@ -47,6 +53,18 @@ export function Model8({
   aiPanelOpen = false,
   aiCompleted = false,
   onOpenAIAnalysis,
+
+  chamberInfoPanelOpen = false,
+  chamberControlsPanelOpen = false,
+  selectedFeatureId = null,
+  modelRotationY = 0,
+  modelZoom = 1,
+  onOpenChamberInfo,
+  onOpenChamberControls,
+
+  learningPanelOpen = false,
+  learningCompleted = false,
+  onOpenLearningPanel,
 
   ...props
 }) {
@@ -90,6 +108,29 @@ export function Model8({
   const dropBaseScale = useRef(new THREE.Vector3(1, 1, 1));
   const samplePrepOriginalMaterials = useRef({});
 
+  const chamberPlatformGlowRef = useRef();
+  const hologramRingRef = useRef();
+  const hologramRingRef2 = useRef();
+  const hologramParticlesRef = useRef();
+  const mappedModelAnchorRef = useRef();
+  const mappedModelPivotRef = useRef();
+  const mappedModelInnerRef = useRef();
+  const focusTargetRef = useRef(new THREE.Vector3(0, 0, 0));
+
+  const leftScreenRef = useRef();
+  const rightScreenRef = useRef();
+  const leftScreenGlowRef = useRef();
+  const rightScreenGlowRef = useRef();
+  const leftScreenDisplayRef = useRef();
+  const rightScreenDisplayRef = useRef();
+
+  const learningScreenRef = useRef();
+  const learningScreenDisplayRef = useRef();
+  const learningScreenGlowRef = useRef();
+  const pushPlaneRef = useRef();
+
+  const computerScreenDisplayRef = useRef();
+
   const [animation, setAnimation] = useState("Idle");
 
   const isSamplePrepStarted = samplePrepStep !== "idle";
@@ -104,6 +145,14 @@ export function Model8({
     PARASITE_DATA[aiDetectionResult.parasiteId]?.[aiDetectionResult.stage];
 
   const mappedParasiteComponent = mappedParasite?.Component;
+
+  const selectedMarker =
+    mappedParasite?.markers?.find(
+      (marker) => marker.id === selectedFeatureId,
+    ) || null;
+
+  const isLearningPanelAvailable =
+    aiCompleted && showMappedModel && !learningCompleted;
 
   const glassMat = useMemo(
     () =>
@@ -210,10 +259,90 @@ export function Model8({
     [],
   );
 
+  const platformGlowMat = useMemo(
+    () =>
+      new THREE.MeshBasicMaterial({
+        color: 0x66ffff,
+        transparent: true,
+        opacity: 0.35,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        side: THREE.DoubleSide,
+        toneMapped: false,
+      }),
+    [],
+  );
+
+  const hologramRingMat = useMemo(
+    () =>
+      new THREE.MeshBasicMaterial({
+        color: 0x66ffff,
+        transparent: true,
+        opacity: 0.45,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        side: THREE.DoubleSide,
+        toneMapped: false,
+      }),
+    [],
+  );
+
+  const featureMarkerMat = useMemo(
+    () =>
+      new THREE.MeshBasicMaterial({
+        color: 0xffdd55,
+        transparent: true,
+        opacity: 0.95,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        toneMapped: false,
+      }),
+    [],
+  );
+
   const aiScreenTextures = useTexture({
     idle: "/textures/ai-screen-idle.png",
     received: "/textures/ai-screen-received.png",
   });
+
+  const chamberScreenTextures = useTexture({
+    leftIdle: "/textures/chamber-left-idle.png",
+    leftActive: "/textures/chamber-left-active.png",
+    rightIdle: "/textures/chamber-right-idle.png",
+    rightActive: "/textures/chamber-right-active.png",
+  });
+
+  Object.values(chamberScreenTextures).forEach((texture) => {
+    if (!texture) return;
+
+    // For normal planeGeometry displays, keep the texture upright.
+    // This is different from GLTF baked textures.
+    texture.flipY = true;
+    texture.colorSpace = THREE.SRGBColorSpace;
+
+    texture.wrapS = THREE.ClampToEdgeWrapping;
+    texture.wrapT = THREE.ClampToEdgeWrapping;
+  });
+
+  const learningScreenTexture = useTexture("/textures/learning-panel-idle.png");
+
+  if (learningScreenTexture) {
+    learningScreenTexture.flipY = true;
+    learningScreenTexture.colorSpace = THREE.SRGBColorSpace;
+    learningScreenTexture.wrapS = THREE.ClampToEdgeWrapping;
+    learningScreenTexture.wrapT = THREE.ClampToEdgeWrapping;
+  }
+
+  const microscopeComputerTexture = useTexture(
+    "/textures/microscope-computer-screen.png",
+  );
+
+  if (microscopeComputerTexture) {
+    microscopeComputerTexture.flipY = true;
+    microscopeComputerTexture.colorSpace = THREE.SRGBColorSpace;
+    microscopeComputerTexture.wrapS = THREE.ClampToEdgeWrapping;
+    microscopeComputerTexture.wrapT = THREE.ClampToEdgeWrapping;
+  }
 
   Object.values(aiScreenTextures).forEach((texture) => {
     if (!texture) return;
@@ -228,6 +357,30 @@ export function Model8({
     texture.rotation = Math.PI / 2;
     // texture.scale = 0.5;
   });
+
+  // useEffect(() => {
+  //   if (leftScreenRef.current) {
+  //     const map = showMappedModel
+  //       ? chamberScreenTextures.leftActive
+  //       : chamberScreenTextures.leftIdle;
+
+  //     leftScreenRef.current.material = new THREE.MeshBasicMaterial({
+  //       map,
+  //       toneMapped: false,
+  //     });
+  //   }
+
+  //   if (rightScreenRef.current) {
+  //     const map = showMappedModel
+  //       ? chamberScreenTextures.rightActive
+  //       : chamberScreenTextures.rightIdle;
+
+  //     rightScreenRef.current.material = new THREE.MeshBasicMaterial({
+  //       map,
+  //       toneMapped: false,
+  //     });
+  //   }
+  // }, [showMappedModel, chamberScreenTextures]);
 
   const textures = useTexture({
     TexturePackOne: "/textures/TexturePackOne.webp",
@@ -433,6 +586,14 @@ export function Model8({
     aiScreenRef.current.material.needsUpdate = true;
   }, [aiStep, aiScreenTextures]);
 
+  const handleLearningPanelClick = (event) => {
+    event.stopPropagation();
+
+    if (isLearningPanelAvailable && onOpenLearningPanel) {
+      onOpenLearningPanel();
+    }
+  };
+
   const handleAIScreenClick = (event) => {
     event.stopPropagation();
 
@@ -516,6 +677,56 @@ export function Model8({
       onOpenMicroscope();
     }
   };
+
+  const handleLeftScreenClick = (event) => {
+    event.stopPropagation();
+
+    if (showMappedModel && onOpenChamberInfo) {
+      onOpenChamberInfo();
+    }
+  };
+
+  const handleRightScreenClick = (event) => {
+    event.stopPropagation();
+
+    if (showMappedModel && onOpenChamberControls) {
+      onOpenChamberControls();
+    }
+  };
+
+  const hologramParticleGeometry = useMemo(() => {
+    const count = 120;
+    const positions = new Float32Array(count * 3);
+
+    for (let i = 0; i < count; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const radius = 0.4 + Math.random() * 2.1;
+      const height = Math.random() * 3.2;
+
+      positions[i * 3] = Math.cos(angle) * radius;
+      positions[i * 3 + 1] = height;
+      positions[i * 3 + 2] = Math.sin(angle) * radius;
+    }
+
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+
+    return geometry;
+  }, []);
+
+  const hologramParticleMat = useMemo(
+    () =>
+      new THREE.PointsMaterial({
+        color: 0x66ffff,
+        size: 0.055,
+        transparent: true,
+        opacity: 0.75,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        toneMapped: false,
+      }),
+    [],
+  );
 
   useFrame((state, delta) => {
     if (!characterGroup.current) return;
@@ -782,6 +993,117 @@ export function Model8({
         aiScreenGlowRef.current.scale.set(glowScale, glowScale, glowScale);
       }
     }
+
+    if (chamberPlatformGlowRef.current) {
+      chamberPlatformGlowRef.current.visible = showMappedModel;
+
+      if (showMappedModel) {
+        // Constant glow, no blinking/pulsing
+        chamberPlatformGlowRef.current.material.opacity = 0.32;
+
+        // Keep scale fixed so it does not pulse
+        chamberPlatformGlowRef.current.scale.set(1.04, 1.04, 1.04);
+      }
+    }
+
+    if (hologramRingRef.current) {
+      hologramRingRef.current.visible = showMappedModel;
+      hologramRingRef.current.rotation.z += delta * 0.6;
+      hologramRingRef.current.material.opacity = 0.35;
+    }
+
+    if (hologramRingRef2.current) {
+      hologramRingRef2.current.visible = showMappedModel;
+      hologramRingRef2.current.rotation.z -= delta * 0.4;
+      hologramRingRef2.current.material.opacity = 0.26;
+    }
+
+    if (hologramParticlesRef.current) {
+      hologramParticlesRef.current.visible = showMappedModel;
+      hologramParticlesRef.current.rotation.y += delta * 0.18;
+    }
+
+    if (mappedModelPivotRef.current) {
+      const targetRotationY = THREE.MathUtils.degToRad(modelRotationY);
+
+      mappedModelPivotRef.current.rotation.y = THREE.MathUtils.lerp(
+        mappedModelPivotRef.current.rotation.y,
+        targetRotationY,
+        1 - Math.exp(-8 * delta),
+      );
+
+      const baseScale = mappedParasite?.scale ?? 0.9;
+      const focusScale = selectedMarker
+        ? (mappedParasite?.focusScale ?? 2.2)
+        : 1;
+
+      const finalScale = baseScale * modelZoom * focusScale;
+
+      mappedModelPivotRef.current.scale.lerp(
+        new THREE.Vector3(finalScale, finalScale, finalScale),
+        1 - Math.exp(-6 * delta),
+      );
+    }
+
+    if (mappedModelInnerRef.current) {
+      const ease = 1 - Math.exp(-5 * delta);
+
+      if (selectedMarker) {
+        const [mx, my, mz = 0] = selectedMarker.position;
+        const [offX, offY, offZ = 0] = mappedParasite?.focusFrameOffset ?? [
+          0, 0, 0,
+        ];
+
+        focusTargetRef.current.set(
+          -mx * 1.25 + offX,
+          -my * 1.25 + offY,
+          -mz * 0.25 + offZ,
+        );
+      } else {
+        focusTargetRef.current.set(0, 0, 0);
+      }
+
+      mappedModelInnerRef.current.position.lerp(focusTargetRef.current, ease);
+    }
+
+    if (leftScreenGlowRef.current) {
+      const shouldGlow = showMappedModel && !chamberInfoPanelOpen;
+      leftScreenGlowRef.current.visible = shouldGlow;
+
+      if (shouldGlow) {
+        leftScreenGlowRef.current.material.opacity = 0.18 + pulse * 0.42;
+        const glowScale = 1.02 + pulse * 0.02;
+        leftScreenGlowRef.current.scale.set(glowScale, glowScale, glowScale);
+      }
+    }
+
+    if (rightScreenGlowRef.current) {
+      const shouldGlow = showMappedModel && !chamberControlsPanelOpen;
+      rightScreenGlowRef.current.visible = shouldGlow;
+
+      if (shouldGlow) {
+        rightScreenGlowRef.current.material.opacity = 0.18 + pulse * 0.42;
+        const glowScale = 1.02 + pulse * 0.02;
+        rightScreenGlowRef.current.scale.set(glowScale, glowScale, glowScale);
+      }
+    }
+
+    if (learningScreenGlowRef.current) {
+      const shouldGlow = isLearningPanelAvailable && !learningPanelOpen;
+
+      learningScreenGlowRef.current.visible = shouldGlow;
+
+      if (shouldGlow) {
+        learningScreenGlowRef.current.material.opacity = 0.16 + pulse * 0.42;
+
+        const glowScale = 1.02 + pulse * 0.025;
+        learningScreenGlowRef.current.scale.set(
+          glowScale,
+          glowScale,
+          glowScale,
+        );
+      }
+    }
   });
 
   return (
@@ -848,13 +1170,32 @@ export function Model8({
         visible={isDropVisible}
       />
 
-      <mesh
-        name="ComputerScreen"
-        geometry={nodes.ComputerScreen.geometry}
-        material={nodes.ComputerScreen.material}
+      <group
+        name="ComputerScreenGroup"
         position={[28.996, 3.433, 16.041]}
         rotation={[-Math.PI, 0.14, -Math.PI]}
-      />
+      >
+        <mesh
+          name="ComputerScreen"
+          geometry={nodes.ComputerScreen.geometry}
+          material={nodes.ComputerScreen.material}
+        />
+
+        <mesh
+          ref={computerScreenDisplayRef}
+          name="ComputerScreenDisplay"
+          position={[0.05, 0, 0.035]}
+          rotation={[0, Math.PI / 2, 0]}
+          renderOrder={34}
+        >
+          <planeGeometry args={[2.2, 1.3]} />
+          <meshBasicMaterial
+            map={microscopeComputerTexture}
+            toneMapped={false}
+            side={THREE.DoubleSide}
+          />
+        </mesh>
+      </group>
 
       <group position={[17.388, 4.74, 24.954]} rotation={[Math.PI / 2, 0, 0]}>
         <mesh
@@ -884,13 +1225,55 @@ export function Model8({
         />
       </group>
 
-      <mesh
-        name="LeftScreen"
-        geometry={nodes.LeftScreen.geometry}
-        material={nodes.LeftScreen.material}
+      <group
+        name="LeftScreenGroup"
         position={[7.898, 3.51, 16.624]}
         rotation={[Math.PI / 2, 0, -2.322]}
-      />
+      >
+        {/* Original physical screen mesh */}
+        <mesh
+          ref={leftScreenRef}
+          name="LeftScreen"
+          geometry={nodes.LeftScreen.geometry}
+          material={nodes.LeftScreen.material}
+        />
+
+        {/* Clean image display plane */}
+        <mesh
+          ref={leftScreenDisplayRef}
+          name="LeftScreenDisplay"
+          position={[0.01, 0.01, 0.001]}
+          rotation={[-Math.PI / 2, 0, 0]}
+          scale={[1.21, 1.45, 1.21]}
+          onClick={handleLeftScreenClick}
+          onPointerOver={showMappedModel ? handlePointerCursor : undefined}
+          onPointerOut={showMappedModel ? handlePointerOutCursor : undefined}
+          renderOrder={34}
+        >
+          <planeGeometry args={[2.45, 3.65]} />
+          <meshBasicMaterial
+            map={
+              showMappedModel
+                ? chamberScreenTextures.leftActive
+                : chamberScreenTextures.leftIdle
+            }
+            toneMapped={false}
+            side={THREE.DoubleSide}
+          />
+        </mesh>
+
+        {/* Glow plane, slightly bigger than the display plane */}
+        {/* <mesh
+          ref={leftScreenGlowRef}
+          name="LeftScreenGlow"
+          position={[0, 0, 0.06]}
+          visible={false}
+          renderOrder={36}
+        >
+          <planeGeometry args={[2.55, 3.75]} />
+          <primitive object={platformGlowMat} attach="material" />
+        </mesh> */}
+      </group>
 
       <mesh
         ref={(el) => (bubbleRefs.current[0] = el)}
@@ -1027,13 +1410,61 @@ export function Model8({
         rotation={[Math.PI / 2, 0, 0]}
       />
 
-      <mesh
-        name="LearningScreen"
-        geometry={nodes.LearningScreen.geometry}
-        material={nodes.LearningScreen.material}
+      <group
+        name="LearningScreenGroup"
         position={[10.172, 3.462, 0.114]}
         rotation={[Math.PI / 2, 0, 0]}
-      />
+      >
+        <mesh
+          ref={learningScreenRef}
+          name="LearningScreen"
+          geometry={nodes.LearningScreen.geometry}
+          material={nodes.LearningScreen.material}
+          onClick={handleLearningPanelClick}
+          onPointerOver={
+            isLearningPanelAvailable ? handlePointerCursor : undefined
+          }
+          onPointerOut={
+            isLearningPanelAvailable ? handlePointerOutCursor : undefined
+          }
+        />
+
+        <mesh
+          ref={learningScreenDisplayRef}
+          name="LearningScreenDisplay"
+          position={[0.002, 0.01, 0.001]}
+          rotation={[-Math.PI / 2, 0, 0]}
+          scale={[3.05, 3.55, 3.05]}
+          onClick={handleLearningPanelClick}
+          onPointerOver={
+            isLearningPanelAvailable ? handlePointerCursor : undefined
+          }
+          onPointerOut={
+            isLearningPanelAvailable ? handlePointerOutCursor : undefined
+          }
+          renderOrder={34}
+        >
+          <planeGeometry args={[3.2, 1.9]} />
+          <meshBasicMaterial
+            map={learningScreenTexture}
+            toneMapped={false}
+            side={THREE.DoubleSide}
+          />
+        </mesh>
+
+        <mesh
+          ref={learningScreenGlowRef}
+          name="LearningScreenGlow"
+          position={[0, 0.012, 0.002]}
+          rotation={[-Math.PI / 2, 0, 0]}
+          scale={[3.05, 3.55, 3.05]}
+          visible={false}
+          renderOrder={36}
+        >
+          <planeGeometry args={[9.3, 6.5]} />
+          <primitive object={platformGlowMat} attach="material" />
+        </mesh>
+      </group>
 
       <mesh
         name="Beaker_glass2"
@@ -1122,13 +1553,57 @@ export function Model8({
         rotation={[0, -1.52, 0]}
       />
 
-      <mesh
-        name="RightScreen"
-        geometry={nodes.RightScreen.geometry}
-        material={nodes.RightScreen.material}
+      <group
+        name="RightScreenGroup"
         position={[7.832, 3.51, 9.921]}
         rotation={[Math.PI / 2, 0, -0.898]}
-      />
+      >
+        {/* Original physical screen mesh */}
+        <mesh
+          ref={rightScreenRef}
+          name="RightScreen"
+          geometry={nodes.RightScreen.geometry}
+          material={nodes.RightScreen.material}
+        />
+
+        {/* Clean image display plane */}
+        <mesh
+          ref={rightScreenDisplayRef}
+          name="RightScreenDisplay"
+          position={[0, 0.01, 0.001]}
+          rotation={[-Math.PI / 2, 0, 0]}
+          scale={[1.21, 1.45, 1.21]}
+          onClick={handleRightScreenClick}
+          onPointerOver={showMappedModel ? handlePointerCursor : undefined}
+          onPointerOut={showMappedModel ? handlePointerOutCursor : undefined}
+          renderOrder={34}
+        >
+          <planeGeometry args={[2.45, 3.65]} />
+          <meshBasicMaterial
+            map={
+              showMappedModel
+                ? chamberScreenTextures.rightActive
+                : chamberScreenTextures.rightIdle
+            }
+            toneMapped={false}
+            side={THREE.DoubleSide}
+          />
+        </mesh>
+
+        {/* Glow plane */}
+        {/* <mesh
+          ref={rightScreenGlowRef}
+          name="RightScreenGlow"
+          position={[0, 0.01, 0.01]}
+          rotation={[-Math.PI / 2, 0, 0]}
+          scale={[1.21, 1.45, 1.21]}
+          visible={false}
+          renderOrder={36}
+        >
+          <planeGeometry args={[2.55, 3.75]} />
+          <primitive object={platformGlowMat} attach="material" />
+        </mesh> */}
+      </group>
 
       <mesh
         ref={sampleBottleRef}
@@ -1238,21 +1713,82 @@ export function Model8({
         position={[8.227, 0.126, 13.522]}
       />
 
+      <mesh
+        ref={chamberPlatformGlowRef}
+        name="ChamberPlatformGlow"
+        position={[8.227, 0.22, 13.522]}
+        rotation={[-Math.PI / 2, 0, 0]}
+        visible={false}
+        renderOrder={35}
+      >
+        <circleGeometry args={[1.75, 96]} />
+        <primitive object={platformGlowMat} attach="material" />
+      </mesh>
+
+      <group position={[8.227, 1.05, 13.522]} rotation={[Math.PI / 2, 0, 0]}>
+        <mesh ref={hologramRingRef} visible={false}>
+          <ringGeometry args={[1.15, 1.22, 96]} />
+          <primitive object={hologramRingMat} attach="material" />
+        </mesh>
+
+        <mesh ref={hologramRingRef2} visible={false} scale={[1.35, 1.35, 1.35]}>
+          <ringGeometry args={[1.15, 1.19, 96]} />
+          <primitive object={hologramRingMat.clone()} attach="material" />
+        </mesh>
+      </group>
+
+      <points
+        ref={hologramParticlesRef}
+        geometry={hologramParticleGeometry}
+        material={hologramParticleMat}
+        position={[8.227, 1.4, 13.522]}
+        visible={false}
+      />
+
       {showMappedModel && mappedParasiteComponent && (
         <group
-          position={[8.227, 2.15, 11.722]}
-          scale={0.9}
-          rotation={[0, Math.PI * 0.15, 0]}
+          ref={mappedModelAnchorRef}
+          position={[9.5, 2.8, 13.522]}
+          rotation={[0, 0, 0]}
+          scale={1.5}
         >
-          {mappedParasiteComponent}
+          <group ref={mappedModelPivotRef}>
+            <Center>
+              <group ref={mappedModelInnerRef}>
+                {mappedParasiteComponent}
+
+                {selectedMarker && (
+                  <>
+                    <mesh position={selectedMarker.position}>
+                      <sphereGeometry args={[0.11, 32, 32]} />
+                      <primitive object={featureMarkerMat} attach="material" />
+                    </mesh>
+
+                    <mesh position={selectedMarker.position}>
+                      <ringGeometry args={[0.16, 0.19, 48]} />
+                      <primitive object={featureMarkerMat} attach="material" />
+                    </mesh>
+                  </>
+                )}
+              </group>
+            </Center>
+          </group>
         </group>
       )}
 
       <mesh
+        ref={pushPlaneRef}
         name="PushPlane_four"
         geometry={nodes.PushPlane_four.geometry}
         material={nodes.PushPlane_four.material}
         position={[10.663, 1.906, 3.168]}
+        onClick={handleLearningPanelClick}
+        onPointerOver={
+          isLearningPanelAvailable ? handlePointerCursor : undefined
+        }
+        onPointerOut={
+          isLearningPanelAvailable ? handlePointerOutCursor : undefined
+        }
       />
 
       <mesh
