@@ -11,6 +11,7 @@ import { Octree } from "three/examples/jsm/Addons.js";
 import { Capsule } from "three/examples/jsm/Addons.js";
 import { useGraph, useFrame } from "@react-three/fiber";
 import { SkeletonUtils } from "three-stdlib";
+import { PARASITE_DATA } from "./ParasiteConfig";
 
 const CAPSULE_RADIUS = 0.35;
 const CAPSULE_HEIGHT = 1;
@@ -33,6 +34,19 @@ export function Model8({
   microscopeActive = false,
   microscopeCompleted = false,
   onOpenMicroscope,
+
+  aiStep = "idle",
+  aiProgress = 0,
+  aiResultSaved = false,
+  showMappedModel = false,
+  aiDetectionResult,
+  onRunAIDetection,
+  onViewIn3D,
+  onSaveResult,
+
+  aiPanelOpen = false,
+  aiCompleted = false,
+  onOpenAIAnalysis,
 
   ...props
 }) {
@@ -70,6 +84,9 @@ export function Model8({
   const microscopeRef = useRef();
   const microscopeGlowRef = useRef();
 
+  const aiScreenRef = useRef();
+  const aiScreenGlowRef = useRef();
+
   const dropBaseScale = useRef(new THREE.Vector3(1, 1, 1));
   const samplePrepOriginalMaterials = useRef({});
 
@@ -81,6 +98,12 @@ export function Model8({
   );
   const isTopSlideVisible = ["covered", "ready"].includes(samplePrepStep);
   const isSlideReady = samplePrepStep === "ready";
+
+  const mappedParasite =
+    aiDetectionResult &&
+    PARASITE_DATA[aiDetectionResult.parasiteId]?.[aiDetectionResult.stage];
+
+  const mappedParasiteComponent = mappedParasite?.Component;
 
   const glassMat = useMemo(
     () =>
@@ -167,6 +190,45 @@ export function Model8({
     [],
   );
 
+  const aiScreenGlowMat = useMemo(
+    () =>
+      new THREE.MeshBasicMaterial({
+        color: 0x66ffff,
+        transparent: true,
+        opacity: 0.45,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        depthTest: false,
+        side: THREE.DoubleSide,
+        toneMapped: false,
+
+        // Helps prevent z-fighting with the actual AI screen texture
+        polygonOffset: true,
+        polygonOffsetFactor: -4,
+        polygonOffsetUnits: -4,
+      }),
+    [],
+  );
+
+  const aiScreenTextures = useTexture({
+    idle: "/textures/ai-screen-idle.png",
+    received: "/textures/ai-screen-received.png",
+  });
+
+  Object.values(aiScreenTextures).forEach((texture) => {
+    if (!texture) return;
+
+    texture.flipY = false;
+    texture.colorSpace = THREE.SRGBColorSpace;
+
+    // Important: rotate around the center of the image
+    texture.center.set(0.5, 0.5);
+
+    // Fix sideways texture on the AI screen UVs
+    texture.rotation = Math.PI / 2;
+    // texture.scale = 0.5;
+  });
+
   const textures = useTexture({
     TexturePackOne: "/textures/TexturePackOne.webp",
     TexturePackTwo: "/textures/TexturePackTwo.webp",
@@ -214,6 +276,10 @@ export function Model8({
       }
 
       if (n.includes("microscopeglow")) {
+        return;
+      }
+
+      if (n.includes("aiscreenglow")) {
         return;
       }
 
@@ -353,6 +419,26 @@ export function Model8({
       targetRotation.current,
       ROTATION_SPEED,
     );
+  };
+
+  useEffect(() => {
+    if (!aiScreenRef.current) return;
+
+    aiScreenRef.current.material = aiScreenRef.current.material.clone();
+
+    const map =
+      aiStep === "idle" ? aiScreenTextures.idle : aiScreenTextures.received;
+
+    aiScreenRef.current.material.map = map;
+    aiScreenRef.current.material.needsUpdate = true;
+  }, [aiStep, aiScreenTextures]);
+
+  const handleAIScreenClick = (event) => {
+    event.stopPropagation();
+
+    if (aiStep !== "idle" && !aiCompleted && onOpenAIAnalysis) {
+      onOpenAIAnalysis();
+    }
   };
 
   const handleBubbleClick = (event, stationKey) => {
@@ -682,6 +768,20 @@ export function Model8({
         microscopeGlowRef.current.scale.set(glowScale, glowScale, glowScale);
       }
     }
+
+    if (aiScreenGlowRef.current) {
+      const shouldShowAIGlow =
+        aiStep !== "idle" && !aiPanelOpen && !aiCompleted;
+
+      aiScreenGlowRef.current.visible = shouldShowAIGlow;
+
+      if (shouldShowAIGlow) {
+        aiScreenGlowRef.current.material.opacity = 0.2 + pulse * 0.55;
+
+        const glowScale = 1.01 + pulse * 0.03;
+        aiScreenGlowRef.current.scale.set(glowScale, glowScale, glowScale);
+      }
+    }
   });
 
   return (
@@ -756,13 +856,33 @@ export function Model8({
         rotation={[-Math.PI, 0.14, -Math.PI]}
       />
 
-      <mesh
-        name="AIScreen"
-        geometry={nodes.AIScreen.geometry}
-        material={nodes.AIScreen.material}
-        position={[17.388, 4.74, 24.954]}
-        rotation={[Math.PI / 2, 0, 0]}
-      />
+      <group position={[17.388, 4.74, 24.954]} rotation={[Math.PI / 2, 0, 0]}>
+        <mesh
+          ref={aiScreenRef}
+          name="AIScreen"
+          geometry={nodes.AIScreen.geometry}
+          material={nodes.AIScreen.material}
+          onClick={handleAIScreenClick}
+          onPointerOver={
+            aiStep !== "idle" && !aiCompleted ? handlePointerCursor : undefined
+          }
+          onPointerOut={
+            aiStep !== "idle" && !aiCompleted
+              ? handlePointerOutCursor
+              : undefined
+          }
+        />
+
+        <mesh
+          ref={aiScreenGlowRef}
+          name="AIScreenGlow"
+          geometry={nodes.AIScreen.geometry}
+          material={aiScreenGlowMat}
+          position={[0, 0, 0.01]}
+          visible={false}
+          renderOrder={30}
+        />
+      </group>
 
       <mesh
         name="LeftScreen"
@@ -1117,6 +1237,16 @@ export function Model8({
         material={nodes["3DPlatform_one"].material}
         position={[8.227, 0.126, 13.522]}
       />
+
+      {showMappedModel && mappedParasiteComponent && (
+        <group
+          position={[8.227, 2.15, 11.722]}
+          scale={0.9}
+          rotation={[0, Math.PI * 0.15, 0]}
+        >
+          {mappedParasiteComponent}
+        </group>
+      )}
 
       <mesh
         name="PushPlane_four"

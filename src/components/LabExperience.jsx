@@ -20,6 +20,19 @@ export const LabExperience = memo(
     microscopeActive,
     microscopeCompleted,
     onOpenMicroscope,
+
+    aiStep,
+    aiProgress,
+    aiResultSaved,
+    showMappedModel,
+    aiDetectionResult,
+    onRunAIDetection,
+    onViewIn3D,
+    onSaveResult,
+
+    aiPanelOpen,
+    aiCompleted,
+    onOpenAIAnalysis,
   }) => {
     return (
       <>
@@ -41,6 +54,17 @@ export const LabExperience = memo(
           microscopeActive={microscopeActive}
           microscopeCompleted={microscopeCompleted}
           onOpenMicroscope={onOpenMicroscope}
+          aiStep={aiStep}
+          aiProgress={aiProgress}
+          aiResultSaved={aiResultSaved}
+          showMappedModel={showMappedModel}
+          aiDetectionResult={aiDetectionResult}
+          onRunAIDetection={onRunAIDetection}
+          onViewIn3D={onViewIn3D}
+          onSaveResult={onSaveResult}
+          aiPanelOpen={aiPanelOpen}
+          aiCompleted={aiCompleted}
+          onOpenAIAnalysis={onOpenAIAnalysis}
         />
       </>
     );
