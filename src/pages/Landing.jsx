@@ -1,8 +1,8 @@
-import { ExperiencePreview } from "../components/ExperiencePreview";
-import { Footer } from "../components/Footer";
-import { HeroSection } from "../components/HeroSection";
-import { Navigation } from "../components/Navigation";
-import { SystemOverview } from "../components/SystemOverview";
+import { ExperiencePreview } from "../components/landingpage/ExperiencePreview";
+import { Footer } from "../components/landingpage/Footer";
+import { HeroSection } from "../components/landingpage/HeroSection";
+import { Navigation } from "../components/landingpage/Navigation";
+import { SystemOverview } from "../components/landingpage/SystemOverview";
 
 function Landing() {
   return (

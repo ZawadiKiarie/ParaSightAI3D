@@ -1,7 +1,7 @@
 import { useAtomValue } from "jotai";
-import { DashboardHeader } from "../components/DashboardHeader";
-import { ModuleGrid } from "../components/ModuleGrid";
-import { RecentActivity } from "../components/RecentActivity";
+import { DashboardHeader } from "../components/dashboard/DashboardHeader";
+import { ModuleGrid } from "../components/dashboard/ModuleGrid";
+import { RecentActivity } from "../components/dashboard/RecentActivity";
 import { userAtom } from "../store/Store";
 
 export default function Dashboard() {

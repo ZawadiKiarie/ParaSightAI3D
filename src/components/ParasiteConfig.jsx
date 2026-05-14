@@ -27,22 +27,35 @@ export const PARASITE_DATA = {
         "granular/ground-glass cytoplasm",
       ],
       markers: [
-        { id: "nucleus", label: "One Nucleus", position: [-0.08, 0.29, 0.58] },
+        {
+          id: "nucleus",
+          label: "One Nucleus",
+          position: [-0.08, 0.29, 0.58],
+          labelOffset: [0.42, 0.2, 0.05],
+        },
         {
           id: "karyosome",
           label: "Central karyosome",
           position: [0.05, 0.19, 0.42],
+          labelOffset: [0.35, 0.55, 0.12],
         },
         {
           id: "chromatin",
           label: "Peripheral Chromatin",
           position: [0.2, 0.14, 0.12],
+          labelOffset: [0.45, 0.12, -0.08],
         },
-        { id: "RBC", label: "Ingested RBC", position: [-0.47, 0.26, 0.42] },
+        {
+          id: "RBC",
+          label: "Ingested RBC",
+          position: [-0.47, 0.26, 0.42],
+          labelOffset: [-0.5, 0.2, 0],
+        },
         {
           id: "cytoplasm",
-          label: "granular cytoplasm",
+          label: "Granular cytoplasm",
           position: [0.66, 0.02, 0.21],
+          labelOffset: [0.45, 0.12, 0],
         },
       ],
       listScale: 1.9,
@@ -61,11 +74,17 @@ export const PARASITE_DATA = {
         "Centrally located karyosome",
       ],
       markers: [
-        { id: "nuclei", label: "4 Nuclei", position: [0.12, 1.08, 0.58] },
+        {
+          id: "nuclei",
+          label: "4 Nuclei",
+          position: [0.12, 1.08, 0.58],
+          labelOffset: [0.45, -1.12, 0],
+        },
         {
           id: "chromatoid",
           label: "Chromatoid bodies",
           position: [-0.42, 1.25, -0.12],
+          labelOffset: [0.45, -1.12, 0],
         },
         {
           id: "cystWall",
@@ -76,6 +95,7 @@ export const PARASITE_DATA = {
           id: "karyosome",
           label: "Centrally located karyosome",
           position: [0.0, 0.77, 0.56],
+          labelOffset: [0.75, -1.12, 0],
         },
       ],
       listScale: 1.9,
@@ -214,14 +234,14 @@ export const PARASITE_DATA = {
     cyst: {
       Component: <EColiCystModel />,
       features: [
-        "8 Nuclei",
+        "4 Nuclei",
         "Splinter-like Chromatoid bodies",
         "Thick cyst wall",
         "Eccentric karyosome",
         "Diffuse glycogen mass",
       ],
       markers: [
-        { id: "nuclei", label: "8 Nuclei", position: [0.04, 1.06, -2.08] },
+        { id: "nuclei", label: "4 Nuclei", position: [0.04, 1.06, -2.08] },
         {
           id: "chromatoid",
           label: "Splinter-like Chromatoid bodies",

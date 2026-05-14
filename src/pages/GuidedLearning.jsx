@@ -1,17 +1,17 @@
 import { Canvas } from "@react-three/fiber";
-import OverlayUI from "../components/OverlayUI";
+import OverlayUI from "../components/guidedlearning/OverlayUI";
 import { Suspense } from "react";
-import { BackgroundGradient } from "../components/BackgroundGradient";
-import { FloatingBubbles } from "../components/FloatingBubbles";
-import { InteractiveCrosshair } from "../components/InteractiveCrosshair";
-import { SpecimenStage } from "../components/SpecimenStage";
+import { BackgroundGradient } from "../components/guidedlearning/BackgroundGradient";
+import { FloatingBubbles } from "../components/guidedlearning/FloatingBubbles";
+import { InteractiveCrosshair } from "../components/guidedlearning/InteractiveCrosshair";
+import { SpecimenStage } from "../components/guidedlearning/SpecimenStage";
 import { useAtomValue } from "jotai";
 import { viewAtom } from "../store/Store";
 import { AnimatePresence } from "motion/react";
-import { ListOverlay } from "../components/ListOverlay";
-import { StageToggle } from "../components/StageToggle";
-import { FocusFeatureOverlay } from "../components/FocusFeatureOverlay";
-import { IsolatedFeatureOverlay } from "../components/IsolatedFeatureOvelay";
+import { ListOverlay } from "../components/guidedlearning/ListOverlay";
+import { StageToggle } from "../components/guidedlearning/StageToggle";
+import { FocusFeatureOverlay } from "../components/guidedlearning/FocusFeatureOverlay";
+import { IsolatedFeatureOverlay } from "../components/guidedlearning/IsolatedFeatureOvelay";
 
 function GuidedLearning() {
   const view = useAtomValue(viewAtom);

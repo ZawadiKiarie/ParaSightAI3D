@@ -1,9 +1,4 @@
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import { ExperiencePreview } from "./components/ExperiencePreview";
-import { Footer } from "./components/Footer";
-import { HeroSection } from "./components/HeroSection";
-import { Navigation } from "./components/Navigation";
-import { SystemOverview } from "./components/SystemOverview";
 import Landing from "./pages/Landing";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
@@ -29,7 +24,17 @@ function App() {
           <Route path="/3dview" element={<ThreeDView />} />
           <Route path="/reports" element={<ReportsList />} />
           <Route path="/reports/:id" element={<ReportDetails />} />
-          <Route path="/labsimulation" element={<LabSimulation />} />
+          <Route
+            path="/labsimulation"
+            element={
+              <LabSimulation
+                testParasiteName="Entamoeba Histolytica"
+                testStage="trophozoite"
+                testConfidence={88}
+                testMicroscopeImage="/textures/giardiacyst.png"
+              />
+            }
+          />
           <Route path="/guidedlearning" element={<GuidedLearning />} />
         </Routes>
       </Router>
