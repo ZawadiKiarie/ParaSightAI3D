@@ -5,6 +5,16 @@ import { LoadingScreen } from "../components/LoadingScreen";
 import { X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { PARASITE_DATA } from "../components/ParasiteConfig";
+import { useSetAtom } from "jotai";
+import {
+  viewAtom,
+  focusedMarkerIdAtom,
+  hoveredMarkerAtom,
+  focusedFeatureIndexAtom,
+  parasiteAtom,
+  stageAtom,
+  infoSectionAtom,
+} from "../store/Store";
 
 const STATION_CONTENT = {
   samplePrep: {
@@ -950,7 +960,8 @@ function ChamberInfoPanel({ aiDetectionResult, features, onClose }) {
 function ChamberControlsPanel({
   markers,
   selectedFeatureId,
-  setSelectedFeatureId,
+  onSelectFeature,
+  onClearFeature,
   modelRotationY,
   setModelRotationY,
   modelZoom,
@@ -1019,7 +1030,7 @@ function ChamberControlsPanel({
             {markers.map((marker) => (
               <button
                 key={marker.id}
-                onClick={() => setSelectedFeatureId(marker.id)}
+                onClick={() => onSelectFeature(marker.id)}
                 className={`w-full px-4 py-3 border text-left transition ${
                   selectedFeatureId === marker.id
                     ? "border-cyan-200 bg-cyan-300/15 text-cyan-100"
@@ -1034,7 +1045,7 @@ function ChamberControlsPanel({
 
           {selectedFeatureId && (
             <button
-              onClick={() => setSelectedFeatureId(null)}
+              onClick={onClearFeature}
               className="mt-5 w-full px-5 py-3 border border-white/20 text-white/70 hover:bg-white hover:text-black transition"
             >
               Clear Focus
@@ -1243,6 +1254,14 @@ export const LabSimulation = () => {
   const moveInputRef = useRef({ x: 0, y: 0 });
   const lookInputRef = useRef({ x: 0, y: 0 });
 
+  const setView = useSetAtom(viewAtom);
+  const setFocusedMarkerId = useSetAtom(focusedMarkerIdAtom);
+  const setHoveredMarker = useSetAtom(hoveredMarkerAtom);
+  const setFocusedFeatureIndex = useSetAtom(focusedFeatureIndexAtom);
+  const setParasite = useSetAtom(parasiteAtom);
+  const setStage = useSetAtom(stageAtom);
+  const setInfoSection = useSetAtom(infoSectionAtom);
+
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
   const [hasShownWelcomeModal, setHasShownWelcomeModal] = useState(false);
   const [activeStation, setActiveStation] = useState(null);
@@ -1299,6 +1318,36 @@ export const LabSimulation = () => {
   const [activeLearningTab, setActiveLearningTab] = useState("overview");
   const [showCompletionPopup, setShowCompletionPopup] = useState(false);
 
+  const handleSelectChamberFeature = (markerId) => {
+    const markerIndex = mappedMarkers.findIndex(
+      (marker) => marker.id === markerId,
+    );
+
+    setSelectedFeatureId(markerId);
+
+    setParasite(aiDetectionResult.parasiteId);
+    setStage(aiDetectionResult.stage);
+
+    setFocusedMarkerId(markerId);
+    setHoveredMarker(markerId);
+    setFocusedFeatureIndex(markerIndex >= 0 ? markerIndex : 0);
+    setInfoSection("overview");
+    setView("ISOLATED");
+  };
+
+  const handleClearChamberFeature = () => {
+    setSelectedFeatureId(null);
+
+    setFocusedMarkerId(null);
+    setHoveredMarker(null);
+    setFocusedFeatureIndex(0);
+    setInfoSection("overview");
+
+    // Use LIST or HOME depending on what you want after clearing.
+    // For the lab simulation, LIST is safer because the model remains fully visible.
+    setView("LIST");
+  };
+
   const handleOpenLearningPanel = () => {
     setLearningPanelOpen(true);
     setActiveLearningTab("overview");
@@ -1312,6 +1361,12 @@ export const LabSimulation = () => {
     setLearningPanelOpen(false);
     setLearningCompleted(true);
     setShowCompletionPopup(true);
+
+    setView("HOME");
+    setFocusedMarkerId(null);
+    setHoveredMarker(null);
+    setFocusedFeatureIndex(0);
+    setInfoSection("overview");
   };
 
   const resetLabState = () => {
@@ -1357,6 +1412,12 @@ export const LabSimulation = () => {
     setShowCompletionPopup(false);
 
     setLabRunKey((key) => key + 1);
+
+    setView("HOME");
+    setFocusedMarkerId(null);
+    setHoveredMarker(null);
+    setFocusedFeatureIndex(0);
+    setInfoSection("overview");
   };
 
   const handleReturnToDashboard = () => {
@@ -1631,7 +1692,8 @@ export const LabSimulation = () => {
           <ChamberControlsPanel
             markers={mappedMarkers}
             selectedFeatureId={selectedFeatureId}
-            setSelectedFeatureId={setSelectedFeatureId}
+            onSelectFeature={handleSelectChamberFeature}
+            onClearFeature={handleClearChamberFeature}
             modelRotationY={modelRotationY}
             setModelRotationY={setModelRotationY}
             modelZoom={modelZoom}
