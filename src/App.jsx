@@ -8,7 +8,7 @@ import ThreeDView from "./pages/3DView";
 import ReportsList from "./pages/ReportList";
 import ReportDetails from "./pages/ReportDetails";
 import { LabSimulation } from "./pages/LabSimulation";
-import GuidedLearning from "./pages/guidedlearning";
+import GuidedLearning from "./pages/GuidedLearning";
 
 function App() {
   return (
