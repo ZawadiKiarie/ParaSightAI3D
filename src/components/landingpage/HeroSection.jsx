@@ -49,14 +49,14 @@ export function HeroSection() {
               <ArrowRight className="w-5 h-5" />
             </motion.button>
 
-            <motion.button
+            {/* <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className="px-8 py-4 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 text-white font-semibold flex items-center gap-2 hover:bg-white/20 transition-colors"
             >
               <Play className="w-5 h-5" />
               Learn More
-            </motion.button>
+            </motion.button> */}
           </div>
         </motion.div>
 

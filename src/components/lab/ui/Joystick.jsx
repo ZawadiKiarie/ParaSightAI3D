@@ -6,11 +6,16 @@ import { useState } from "react";
  * Touch joystick used by the lab simulation.
  *
  * The left joystick controls character movement.
- * The right joystick controls camera look direction.
+ * The right joystick controls camera look direction / room panning.
  */
 export function Joystick({ side, onChange }) {
   const [active, setActive] = useState(false);
   const [stick, setStick] = useState({ x: 0, y: 0 });
+
+  const isLeft = side === "left";
+
+  const label = isLeft ? "Move Character" : "Pan Around";
+  const subLabel = isLeft ? "Walk" : "Pan";
 
   const handleMove = (e) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -40,26 +45,39 @@ export function Joystick({ side, onChange }) {
 
   return (
     <div
-      onPointerDown={(e) => {
-        setActive(true);
-        e.currentTarget.setPointerCapture(e.pointerId);
-        handleMove(e);
-      }}
-      onPointerMove={(e) => {
-        if (active) handleMove(e);
-      }}
-      onPointerUp={stop}
-      onPointerCancel={stop}
       className={`absolute bottom-10 ${
-        side === "left" ? "left-10" : "right-10"
-      } w-36 h-36 rounded-full bg-white/20 border border-white/30 backdrop-blur-md flex items-center justify-center z-20 touch-none`}
+        isLeft ? "left-10" : "right-10"
+      } z-20 flex flex-col items-center gap-3 select-none`}
     >
+      {/* Label */}
+      <div className="rounded-full border border-white/20 bg-black/35 px-4 py-2 text-center text-white backdrop-blur-md shadow-lg">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em]">
+          {label}
+        </p>
+        <p className="mt-0.5 text-[10px] text-white/60">{subLabel}</p>
+      </div>
+
+      {/* Joystick */}
       <div
-        style={{
-          transform: `translate(${stick.x}px, ${stick.y}px)`,
+        onPointerDown={(e) => {
+          setActive(true);
+          e.currentTarget.setPointerCapture(e.pointerId);
+          handleMove(e);
         }}
-        className="w-16 h-16 rounded-full bg-white/40 border border-white/40"
-      />
+        onPointerMove={(e) => {
+          if (active) handleMove(e);
+        }}
+        onPointerUp={stop}
+        onPointerCancel={stop}
+        className="w-36 h-36 rounded-full bg-white/20 border border-white/30 backdrop-blur-md flex items-center justify-center touch-none"
+      >
+        <div
+          style={{
+            transform: `translate(${stick.x}px, ${stick.y}px)`,
+          }}
+          className="w-16 h-16 rounded-full bg-white/40 border border-white/40"
+        />
+      </div>
     </div>
   );
 }

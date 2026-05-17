@@ -1,4 +1,5 @@
 // src/components/lab/ui/MicroscopeOverlay.jsx
+import { useRef } from "react";
 
 /**
  * Full microscope-view overlay.
@@ -20,6 +21,7 @@ export function MicroscopeOverlay({
   setBrightness,
   microscopeStep,
   microscopeImage,
+  onReplaceMicroscopeImage,
   onScan,
   onCapture,
   onSendToAI,
@@ -31,6 +33,18 @@ export function MicroscopeOverlay({
 
   const blurAmount = Math.max(0, 10 - focus / 10);
   const scaleAmount = 1 + zoom / 120;
+
+  const fileInputRef = useRef(null);
+
+  const handleImageUpload = (event) => {
+    const file = event.target.files?.[0];
+
+    if (!file) return;
+
+    onReplaceMicroscopeImage?.(file);
+
+    event.target.value = "";
+  };
 
   return (
     <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/45 backdrop-blur-sm px-4 py-4">
@@ -228,6 +242,28 @@ export function MicroscopeOverlay({
                     </div>
                   </div>
                 )}
+              </div>
+
+              <div className="mt-5 border border-white/10 bg-white/5 p-4">
+                <p className="text-white/70 text-sm mb-3">
+                  Want to test a different microscope image?
+                </p>
+
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-full px-5 py-3 border border-white/25 text-white/80 hover:bg-white hover:text-black transition"
+                >
+                  Upload Sample Image
+                </button>
+
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                />
               </div>
             </div>
           </div>

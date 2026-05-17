@@ -97,26 +97,7 @@ export function ParasiteModelPreview({
         <group>
           {modelComponent}
 
-          {activeMarker && (
-            <>
-              {/* Small visible marker at the selected diagnostic feature */}
-              <mesh position={activeMarker.position} renderOrder={999}>
-                <sphereGeometry
-                  args={[activeMarker.markerScale ?? 0.08, 24, 24]}
-                />
-                <meshBasicMaterial
-                  color="#22d3ee"
-                  transparent
-                  opacity={0.95}
-                  depthTest={false}
-                  depthWrite={false}
-                  toneMapped={false}
-                />
-              </mesh>
-
-              <FeatureLabel marker={activeMarker} />
-            </>
-          )}
+          {activeMarker && <FeatureLabel marker={activeMarker} />}
         </group>
       </Center>
     </group>

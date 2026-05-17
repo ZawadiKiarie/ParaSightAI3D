@@ -1,41 +1,59 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { mockReports } from "../store/MockReports";
 import {
   ArrowLeft,
   Calendar,
   User,
   FileText,
   Download,
-  Box,
   CheckCircle,
   Clock,
   Image as ImageIcon,
+  Loader2,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+const API_BASE_URL =
+  import.meta.env.VITE_BACKEND_API_URL || "http://localhost:3000";
 
 export default function ReportDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const report = mockReports.find((r) => r.id === id);
 
-  const [notes, setNotes] = useState(report?.notes || "");
+  const [report, setReport] = useState(null);
+  const [notes, setNotes] = useState("");
   const [isEditing, setIsEditing] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState("");
 
-  if (!report) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl text-gray-900 mb-4">Report not found</h2>
-          <Link
-            to="/reports"
-            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-          >
-            Back to Reports
-          </Link>
-        </div>
-      </div>
-    );
-  }
+  const fetchReport = async () => {
+    try {
+      setIsLoading(true);
+      setErrorMsg("");
+
+      const response = await fetch(`${API_BASE_URL}/reports/${id}`, {
+        headers: {
+          Authorization: window.sessionStorage.getItem("token"),
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to fetch report");
+      }
+
+      setReport(data);
+      setNotes(data.notes || "");
+    } catch (error) {
+      setErrorMsg(error.message || "Could not load report");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchReport();
+  }, [id]);
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -51,33 +69,119 @@ export default function ReportDetails() {
   };
 
   const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
+    return new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",
       day: "numeric",
     });
   };
 
-  const handleExport = () => {
-    // Mock export functionality
-    alert("Export functionality would generate a PDF report here.");
+  const handleExport = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/reports/${id}/export`, {
+        headers: {
+          Authorization: window.sessionStorage.getItem("token"),
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to export PDF");
+      }
+
+      const blob = await response.blob();
+      const objectUrl = URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = objectUrl;
+      link.download = `${id}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      URL.revokeObjectURL(objectUrl);
+    } catch (error) {
+      alert(error.message || "Could not export PDF");
+    }
   };
 
-  // const handleOpen3D = () => {
-  //   // Mock 3D visualization
-  //   alert("3D visualization would open here.");
-  // };
+  const handleSaveNotes = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/reports/${id}/notes`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: window.sessionStorage.getItem("token"),
+        },
+        body: JSON.stringify({ notes }),
+      });
 
-  const handleSaveNotes = () => {
-    setIsEditing(false);
-    // Mock save functionality
-    alert("Notes saved successfully.");
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to save notes");
+      }
+
+      setReport(data);
+      setNotes(data.notes || "");
+      setIsEditing(false);
+    } catch (error) {
+      alert(error.message || "Could not save notes");
+    }
   };
+
+  const handleConfirmResult = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/reports/${id}/confirm`, {
+        method: "PATCH",
+        headers: {
+          Authorization: window.sessionStorage.getItem("token"),
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to confirm report");
+      }
+
+      setReport(data);
+    } catch (error) {
+      alert(error.message || "Could not confirm report");
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center gap-3 text-gray-500">
+        <Loader2 className="size-5 animate-spin" />
+        Loading report...
+      </div>
+    );
+  }
+
+  if (errorMsg || !report) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl text-gray-900 mb-4">
+            {errorMsg || "Report not found"}
+          </h2>
+
+          <Link
+            to="/reports"
+            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+          >
+            Back to Reports
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const fullImageUrl = `${API_BASE_URL}${report.imageUrl}`;
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 py-6">
           <button
@@ -87,17 +191,15 @@ export default function ReportDetails() {
             <ArrowLeft className="mr-2 size-4" />
             Back to Reports
           </button>
+
           <h1 className="text-3xl text-gray-900">Report Details</h1>
           <p className="text-gray-500 mt-1">{report.id}</p>
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="max-w-7xl mx-auto px-6 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Left Column - Summary */}
           <div className="space-y-6">
-            {/* Primary Info Card */}
             <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
               <div className="p-6">
                 <div className="flex items-start justify-between mb-6">
@@ -105,6 +207,7 @@ export default function ReportDetails() {
                     <h2 className="text-2xl text-gray-900 mb-2">
                       {report.parasiteName}
                     </h2>
+
                     <span
                       className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-xs border ${getStatusColor(report.status)}`}
                     >
@@ -113,16 +216,17 @@ export default function ReportDetails() {
                   </div>
                 </div>
 
-                {/* Confidence Score */}
                 <div className="mb-6">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm text-gray-600">
                       Confidence Score
                     </span>
+
                     <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                       {report.confidence}%
                     </span>
                   </div>
+
                   <div className="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full transition-all"
@@ -133,7 +237,6 @@ export default function ReportDetails() {
 
                 <div className="border-t border-gray-200 my-6" />
 
-                {/* Metadata */}
                 <div className="space-y-4">
                   <div className="flex items-center gap-3">
                     <Calendar className="size-5 text-gray-400" />
@@ -146,7 +249,7 @@ export default function ReportDetails() {
                   <div className="flex items-center gap-3">
                     <User className="size-5 text-gray-400" />
                     <div>
-                      <p className="text-sm text-gray-500">Reviewed By</p>
+                      <p className="text-sm text-gray-500">Detected By</p>
                       <p className="text-gray-900">{report.user}</p>
                     </div>
                   </div>
@@ -155,9 +258,7 @@ export default function ReportDetails() {
                     <FileText className="size-5 text-gray-400" />
                     <div>
                       <p className="text-sm text-gray-500">Sample ID</p>
-                      <p className="text-gray-900">
-                        {report.detectionDetails.sampleId}
-                      </p>
+                      <p className="text-gray-900">{report.sampleId}</p>
                     </div>
                   </div>
 
@@ -165,40 +266,51 @@ export default function ReportDetails() {
                     <Clock className="size-5 text-gray-400" />
                     <div>
                       <p className="text-sm text-gray-500">Processing Time</p>
-                      <p className="text-gray-900">
-                        {report.detectionDetails.processingTime}
-                      </p>
+                      <p className="text-gray-900">{report.processingTime}</p>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Detection Details Card */}
             <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
               <div className="p-6">
                 <h3 className="text-lg text-gray-900 mb-4">
                   Detection Details
                 </h3>
+
                 <div className="space-y-3">
                   <div className="flex justify-between">
                     <span className="text-sm text-gray-600">
                       Detection Method
                     </span>
                     <span className="text-sm text-gray-900">
-                      {report.detectionDetails.detectionMethod}
+                      YOLOv8 Object Detection
                     </span>
                   </div>
+
                   <div className="border-t border-gray-200" />
+
                   <div className="flex justify-between">
                     <span className="text-sm text-gray-600">
                       Image Resolution
                     </span>
                     <span className="text-sm text-gray-900">
-                      {report.detectionDetails.imageResolution}
+                      {report.imageResolution}
                     </span>
                   </div>
+
                   <div className="border-t border-gray-200" />
+
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">Life Stage</span>
+                    <span className="text-sm text-gray-900">
+                      {report.stage || "N/A"}
+                    </span>
+                  </div>
+
+                  <div className="border-t border-gray-200" />
+
                   <div className="flex justify-between">
                     <span className="text-sm text-gray-600">Report ID</span>
                     <span className="text-sm font-mono text-gray-900">
@@ -209,13 +321,13 @@ export default function ReportDetails() {
               </div>
             </div>
 
-            {/* Notes Card */}
             <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
               <div className="p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg text-gray-900">
                     Clinical Notes & Observations
                   </h3>
+
                   {!isEditing && (
                     <button
                       onClick={() => setIsEditing(true)}
@@ -225,6 +337,7 @@ export default function ReportDetails() {
                     </button>
                   )}
                 </div>
+
                 {isEditing ? (
                   <div className="space-y-3">
                     <textarea
@@ -233,6 +346,7 @@ export default function ReportDetails() {
                       rows={6}
                       className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                     />
+
                     <div className="flex gap-2">
                       <button
                         onClick={handleSaveNotes}
@@ -240,10 +354,11 @@ export default function ReportDetails() {
                       >
                         Save Notes
                       </button>
+
                       <button
                         onClick={() => {
                           setIsEditing(false);
-                          setNotes(report.notes);
+                          setNotes(report.notes || "");
                         }}
                         className="px-3 py-1.5 text-sm border border-gray-200 rounded-md hover:bg-gray-50 transition-colors"
                       >
@@ -258,39 +373,38 @@ export default function ReportDetails() {
             </div>
           </div>
 
-          {/* Right Column - Image & Actions */}
           <div className="space-y-6">
-            {/* Image Card */}
             <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
               <div className="p-6">
                 <div className="flex items-center gap-2 mb-4">
                   <ImageIcon className="size-5 text-gray-400" />
                   <h3 className="text-lg text-gray-900">Microscopy Image</h3>
                 </div>
+
                 <div className="relative aspect-[4/3] bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
                   <img
-                    src={report.imageUrl}
+                    src={fullImageUrl}
                     alt={report.parasiteName}
                     className="w-full h-full object-cover"
                   />
-                  {/* Optional bounding box overlay */}
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-1/2 h-1/2 border-2 border-blue-500 rounded-lg shadow-lg" />
-                  </div>
                 </div>
+
                 <p className="text-sm text-gray-500 mt-3">
-                  Resolution: {report.detectionDetails.imageResolution}
+                  Resolution: {report.imageResolution}
                 </p>
               </div>
             </div>
 
-            {/* Action Buttons Card */}
             <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
               <div className="p-6">
                 <h3 className="text-lg text-gray-900 mb-4">Actions</h3>
+
                 <div className="space-y-3">
                   {report.status === "Pending Review" && (
-                    <button className="w-full inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+                    <button
+                      onClick={handleConfirmResult}
+                      className="w-full inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                    >
                       <CheckCircle className="mr-2 size-4" />
                       Confirm Result
                     </button>
@@ -303,28 +417,21 @@ export default function ReportDetails() {
                     <Download className="mr-2 size-4" />
                     Export Report (PDF)
                   </button>
-
-                  {/* <button
-                    onClick={handleOpen3D}
-                    className="w-full inline-flex items-center justify-center px-4 py-2 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors"
-                  >
-                    <Box className="mr-2 size-4" />
-                    Open in 3D Visualization
-                  </button> */}
                 </div>
               </div>
             </div>
 
-            {/* Status Timeline Card */}
             <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
               <div className="p-6">
                 <h3 className="text-lg text-gray-900 mb-4">Status History</h3>
+
                 <div className="space-y-4">
                   <div className="flex gap-3">
                     <div className="flex flex-col items-center">
                       <div className="size-2 rounded-full bg-blue-500" />
                       <div className="w-px h-full bg-gray-200 mt-2" />
                     </div>
+
                     <div className="pb-4">
                       <p className="text-sm text-gray-900">Sample Processed</p>
                       <p className="text-xs text-gray-500">
@@ -338,6 +445,7 @@ export default function ReportDetails() {
                       <div className="size-2 rounded-full bg-purple-500" />
                       <div className="w-px h-full bg-gray-200 mt-2" />
                     </div>
+
                     <div className="pb-4">
                       <p className="text-sm text-gray-900">
                         {report.parasiteName} Detected
@@ -360,6 +468,7 @@ export default function ReportDetails() {
                         }`}
                       />
                     </div>
+
                     <div>
                       <p className="text-sm text-gray-900">{report.status}</p>
                       <p className="text-xs text-gray-500">

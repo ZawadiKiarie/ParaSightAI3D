@@ -1,7 +1,7 @@
 // src/pages/3DView.jsx
 
 import { motion } from "motion/react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 import { useThreeDViewState } from "../components/threeDView/hooks/useThreeDViewState";
 
@@ -51,12 +51,15 @@ export default function ThreeDView({
   initialStage = "trophozoite",
   aiResult = null,
 }) {
+  const location = useLocation();
+  const routeAIResult = location.state?.aiResult || aiResult;
+  const microscopeImage = location.state?.image || view.microscopeImage;
   const navigate = useNavigate();
 
   const view = useThreeDViewState({
     parasiteName,
     initialStage,
-    aiResult,
+    aiResult: routeAIResult,
   });
 
   return (
@@ -75,7 +78,7 @@ export default function ThreeDView({
             className="space-y-6"
           >
             <MicroscopicImageCard
-              image={view.microscopeImage}
+              image={microscopeImage}
               parasiteName={view.detectionData.parasiteName}
               lifeStage={view.lifeStage}
             />

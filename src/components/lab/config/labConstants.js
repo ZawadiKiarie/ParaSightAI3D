@@ -8,6 +8,9 @@
 // Main 3D lab model
 export const LAB_MODEL_PATH = "/models/labV8-v1.glb";
 
+export const BACKEND_API_URL =
+  import.meta.env.VITE_BACKEND_API_URL || "http://localhost:3000";
+
 // Character animations
 export const CHARACTER_ANIMATIONS = {
   idle: "/animations/Idle2.fbx",

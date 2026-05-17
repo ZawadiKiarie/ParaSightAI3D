@@ -108,7 +108,7 @@ export function ThreeDCanvas({
           <OrbitControls
             enableDamping
             dampingFactor={0.08}
-            enablePan={false}
+            enablePan={true}
             minDistance={THREE_D_CAMERA.minDistance}
             maxDistance={THREE_D_CAMERA.maxDistance}
           />

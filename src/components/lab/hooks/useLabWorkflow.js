@@ -5,8 +5,22 @@ import { useNavigate } from "react-router-dom";
 
 import { STATION_CONTENT } from "../config/labStations";
 import { buildLabDetectionResult } from "../config/labResultMapper";
-import { DEFAULT_LAB_RESULT } from "../config/labConstants";
 import { useLabGuidedAtoms } from "./useLabGuidedAtoms";
+import { BACKEND_API_URL, DEFAULT_LAB_RESULT } from "../config/labConstants";
+
+const createImageFileFromPath = async (imagePath) => {
+  const response = await fetch(imagePath);
+
+  if (!response.ok) {
+    throw new Error(`Could not load microscope image: ${imagePath}`);
+  }
+
+  const blob = await response.blob();
+
+  return new File([blob], "lab-microscope-image.png", {
+    type: blob.type || "image/png",
+  });
+};
 
 /**
  * Builds dynamic learning panel content from the current AI result.
@@ -56,6 +70,59 @@ export const buildLearningContent = (result) => ({
   },
 });
 
+const runDetectionRequest = async ({
+  microscopeImage,
+  microscopeImageFile,
+}) => {
+  console.time("LAB_TOTAL_DETECTION_REQUEST");
+
+  let imageFile = microscopeImageFile;
+
+  console.log("LAB selected microscope image:", microscopeImage);
+  console.log("LAB selected microscope file:", microscopeImageFile);
+
+  if (!imageFile) {
+    console.time("LAB_FETCH_DEFAULT_IMAGE");
+    imageFile = await createImageFileFromPath(microscopeImage);
+    console.timeEnd("LAB_FETCH_DEFAULT_IMAGE");
+  }
+
+  console.log("LAB file being sent:", {
+    name: imageFile.name,
+    sizeMB: (imageFile.size / 1024 / 1024).toFixed(2),
+    type: imageFile.type,
+  });
+
+  const formData = new FormData();
+  formData.append("image", imageFile);
+
+  console.time("LAB_BACKEND_UPLOAD_REQUEST");
+
+  const response = await fetch(`${BACKEND_API_URL}/upload`, {
+    method: "POST",
+    body: formData,
+  });
+
+  console.timeEnd("LAB_BACKEND_UPLOAD_REQUEST");
+
+  const data = await response.json();
+
+  console.timeEnd("LAB_TOTAL_DETECTION_REQUEST");
+
+  if (!response.ok) {
+    throw new Error(
+      data?.details?.response?.details ||
+        data?.details?.response?.error ||
+        data?.details?.message ||
+        data?.details ||
+        data?.error ||
+        "Failed to run AI detection",
+    );
+  }
+
+  return data;
+};
+
 /**
  * Main lab workflow hook.
  *
@@ -95,22 +162,53 @@ export function useLabWorkflow({
    * This is the single dynamic result object used by the whole lab.
    * Later, when the real AI model is connected, aiResult will replace test props.
    */
+  // const aiDetectionResult = useMemo(() => {
+  //   return buildLabDetectionResult(
+  //     aiResult || {
+  //       parasiteName: testParasiteName,
+  //       stage: testStage,
+  //       confidence: testConfidence,
+  //       microscopeImage: testMicroscopeImage,
+  //       location: DEFAULT_LAB_RESULT.location,
+  //     },
+  //   );
+  // }, [
+  //   aiResult,
+  //   testParasiteName,
+  //   testStage,
+  //   testConfidence,
+  //   testMicroscopeImage,
+  // ]);
+
+  const [realAIResult, setRealAIResult] = useState(null);
+  const [rawDetectionResponse, setRawDetectionResponse] = useState(null);
+  const [aiDetectionError, setAiDetectionError] = useState("");
+  const uploadedMicroscopeImageUrlRef = useRef(null);
+
+  const [selectedMicroscopeImage, setSelectedMicroscopeImage] =
+    useState(testMicroscopeImage);
+
+  const [selectedMicroscopeImageFile, setSelectedMicroscopeImageFile] =
+    useState(null);
+
   const aiDetectionResult = useMemo(() => {
     return buildLabDetectionResult(
-      aiResult || {
-        parasiteName: testParasiteName,
-        stage: testStage,
-        confidence: testConfidence,
-        microscopeImage: testMicroscopeImage,
-        location: DEFAULT_LAB_RESULT.location,
-      },
+      realAIResult ||
+        aiResult || {
+          parasiteName: testParasiteName,
+          stage: testStage,
+          confidence: testConfidence,
+          microscopeImage: selectedMicroscopeImage,
+          location: DEFAULT_LAB_RESULT.location,
+        },
     );
   }, [
+    realAIResult,
     aiResult,
     testParasiteName,
     testStage,
     testConfidence,
-    testMicroscopeImage,
+    selectedMicroscopeImage,
   ]);
 
   const mappedParasite = aiDetectionResult.stageData;
@@ -172,6 +270,11 @@ export function useLabWorkflow({
       if (aiTimerRef.current) {
         clearInterval(aiTimerRef.current);
         aiTimerRef.current = null;
+      }
+
+      if (uploadedMicroscopeImageUrlRef.current) {
+        URL.revokeObjectURL(uploadedMicroscopeImageUrlRef.current);
+        uploadedMicroscopeImageUrlRef.current = null;
       }
 
       document.body.style.cursor = "default";
@@ -270,6 +373,40 @@ export function useLabWorkflow({
     setMicroscopeStep("captured");
   }, [microscopeStep]);
 
+  const handleReplaceMicroscopeImage = useCallback((file) => {
+    if (!file || !file.type.startsWith("image/")) {
+      return;
+    }
+
+    if (uploadedMicroscopeImageUrlRef.current) {
+      URL.revokeObjectURL(uploadedMicroscopeImageUrlRef.current);
+    }
+
+    const objectUrl = URL.createObjectURL(file);
+
+    uploadedMicroscopeImageUrlRef.current = objectUrl;
+
+    setSelectedMicroscopeImage(objectUrl);
+    setSelectedMicroscopeImageFile(file);
+
+    // Reset microscope progress because the sample has changed.
+    setMicroscopeStep("viewing");
+    setMicroscopeFocus(25);
+    setMicroscopeZoom(35);
+    setMicroscopeBrightness(100);
+
+    // Reset AI result because the previous result no longer belongs to this image.
+    setRealAIResult(null);
+    setRawDetectionResponse(null);
+    setAiDetectionError("");
+    setAiStep("idle");
+    setAiProgress(0);
+    setAiResultSaved(false);
+    setShowMappedModel(false);
+    setAiCompleted(false);
+    setAiPanelOpen(false);
+  }, []);
+
   /**
    * Sends the captured microscope image to the AI station.
    * Also syncs the selected parasite/stage to the guided-learning atom system.
@@ -278,6 +415,10 @@ export function useLabWorkflow({
     setMicroscopeActive(false);
     setMicroscopeCompleted(true);
     setMicroscopeStep("sent");
+
+    setRealAIResult(null);
+    setRawDetectionResponse(null);
+    setAiDetectionError("");
 
     setAiStep("received");
     setAiProgress(0);
@@ -317,32 +458,72 @@ export function useLabWorkflow({
     setAiPanelOpen(false);
   }, []);
 
-  const handleRunAIDetection = useCallback(() => {
+  const handleRunAIDetection = useCallback(async () => {
     if (aiStep !== "received") return;
 
     if (aiTimerRef.current) {
       clearInterval(aiTimerRef.current);
+      aiTimerRef.current = null;
     }
 
     setAiStep("analyzing");
     setAiProgress(0);
+    setAiDetectionError("");
 
     let progress = 0;
 
     aiTimerRef.current = setInterval(() => {
-      progress += 10;
-      setAiProgress(Math.min(progress, 100));
+      progress += 8;
 
-      if (progress >= 100) {
+      // Keep it at 90% while waiting for real API response
+      setAiProgress(Math.min(progress, 90));
+    }, 250);
+
+    try {
+      const detectionResponse = await runDetectionRequest({
+        microscopeImage: selectedMicroscopeImage,
+        microscopeImageFile: selectedMicroscopeImageFile,
+      });
+
+      const topDetection = detectionResponse?.results?.topDetection;
+
+      if (!topDetection) {
+        throw new Error("No parasite was detected in the microscope image.");
+      }
+
+      setRawDetectionResponse(detectionResponse);
+
+      setRealAIResult({
+        parasiteName: topDetection.name,
+        parasiteId: topDetection.parasiteId,
+        stage: topDetection.stage,
+        stageSource: topDetection.stageSource || "default_mapping",
+        confidence: topDetection.confidence,
+        location: "detected region",
+        microscopeImage: selectedMicroscopeImage,
+        bbox: topDetection.bbox,
+        bboxNormalized: topDetection.bboxNormalized,
+        allDetections: detectionResponse?.results?.detections || [],
+      });
+
+      setAiProgress(100);
+
+      setTimeout(() => {
+        setAiStep("result");
+      }, 300);
+    } catch (error) {
+      console.error("Lab AI detection failed:", error);
+
+      setAiDetectionError(error.message || "AI detection failed.");
+      setAiStep("received");
+      setAiProgress(0);
+    } finally {
+      if (aiTimerRef.current) {
         clearInterval(aiTimerRef.current);
         aiTimerRef.current = null;
-
-        setTimeout(() => {
-          setAiStep("result");
-        }, 300);
       }
-    }, 250);
-  }, [aiStep]);
+    }
+  }, [aiStep, selectedMicroscopeImage, selectedMicroscopeImageFile]);
 
   const handleViewIn3D = useCallback(() => {
     if (aiStep !== "result" && aiStep !== "mapped") return;
@@ -511,6 +692,9 @@ export function useLabWorkflow({
      * Dynamic AI/lab result
      */
     aiDetectionResult,
+    rawDetectionResponse,
+    aiDetectionError,
+
     mappedParasite,
     mappedFeatures,
     mappedMarkers,
@@ -535,6 +719,9 @@ export function useLabWorkflow({
     /**
      * Microscope state
      */
+    selectedMicroscopeImage,
+    selectedMicroscopeImageFile,
+    handleReplaceMicroscopeImage,
     microscopeActive,
     microscopeCompleted,
     microscopeStep,

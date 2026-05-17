@@ -14,15 +14,21 @@ export function AIAnalysisPanel({
   aiProgress,
   aiResultSaved,
   aiDetectionResult,
+  aiDetectionError,
+  rawDetectionResponse,
   onRunAIDetection,
   onViewIn3D,
   onSaveResult,
   onClose,
   onGoTo3DChamber,
+  microscopeImage,
 }) {
   const hasResult = aiStep === "result" || aiStep === "mapped";
   const isAnalyzing = aiStep === "analyzing";
   const isMapped = aiStep === "mapped";
+
+  const displayMicroscopeImage =
+    microscopeImage || aiDetectionResult?.microscopeImage;
 
   return (
     <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/45 backdrop-blur-sm px-4 py-6">
@@ -46,43 +52,45 @@ export function AIAnalysisPanel({
               </h2>
 
               <div className="w-full h-64 border border-cyan-200/20 bg-slate-950 flex items-center justify-center overflow-hidden">
+                {displayMicroscopeImage &&
+                  (aiStep === "received" ||
+                    aiStep === "analyzing" ||
+                    aiStep === "result" ||
+                    aiStep === "loading3d" ||
+                    aiStep === "mapped") && (
+                    <div className="relative w-[85%] h-[75%] rounded border border-cyan-200/20 overflow-hidden">
+                      <img
+                        src={displayMicroscopeImage}
+                        alt="Captured microscope sample"
+                        className="absolute inset-0 w-full h-full object-cover"
+                        draggable={false}
+                      />
+
+                      {aiStep === "analyzing" && (
+                        <>
+                          <div className="absolute inset-0 bg-cyan-200/10 animate-pulse" />
+                          <div className="absolute top-0 bottom-0 w-12 bg-cyan-200/25 blur-md animate-[aiSweep_1.2s_linear_infinite]" />
+                        </>
+                      )}
+
+                      {(aiStep === "result" || aiStep === "mapped") && (
+                        <div className="absolute left-[42%] top-[38%] w-16 h-12 rounded-full border-2 border-yellow-300 shadow-[0_0_20px_rgba(253,224,71,0.7)]" />
+                      )}
+
+                      {aiStep === "received" && (
+                        <div className="absolute bottom-3 left-3 right-3 bg-black/60 border border-white/10 px-3 py-2">
+                          <p className="text-cyan-100 text-xs">
+                            Captured microscope image received.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
                 {aiStep === "idle" && (
                   <p className="text-white/40 text-sm">
                     Waiting for captured microscope image.
                   </p>
-                )}
-
-                {aiStep === "received" && (
-                  <img
-                    src={aiDetectionResult.microscopeImage}
-                    alt="Captured microscope"
-                    className="w-[85%] h-[75%] rounded border border-cyan-200/20 object-cover"
-                  />
-                )}
-
-                {isAnalyzing && (
-                  <div className="relative w-[85%] h-[75%] rounded border border-cyan-200/20 overflow-hidden">
-                    <img
-                      src={aiDetectionResult.microscopeImage}
-                      alt="Analyzing microscope"
-                      className="absolute inset-0 w-full h-full object-cover"
-                    />
-
-                    <div className="absolute inset-0 bg-cyan-200/10 animate-pulse" />
-                    <div className="absolute top-0 bottom-0 w-12 bg-cyan-200/25 blur-md animate-[aiSweep_1.2s_linear_infinite]" />
-                  </div>
-                )}
-
-                {hasResult && (
-                  <div className="relative w-[85%] h-[75%] rounded border border-yellow-200/30 overflow-hidden">
-                    <img
-                      src={aiDetectionResult.microscopeImage}
-                      alt="AI detection result"
-                      className="absolute inset-0 w-full h-full object-cover"
-                    />
-
-                    <div className="absolute left-[42%] top-[38%] w-16 h-12 rounded-full border-2 border-yellow-300 shadow-[0_0_20px_rgba(253,224,71,0.7)]" />
-                  </div>
                 )}
               </div>
             </div>
@@ -106,6 +114,14 @@ export function AIAnalysisPanel({
                     The microscopy image has been received from the microscope
                     station. Run AI detection to analyze the sample.
                   </p>
+
+                  {aiDetectionError && (
+                    <div className="mb-5 border border-red-300/30 bg-red-500/10 p-4">
+                      <p className="text-red-100 text-sm leading-relaxed">
+                        {aiDetectionError}
+                      </p>
+                    </div>
+                  )}
 
                   <button
                     onClick={onRunAIDetection}
@@ -184,12 +200,12 @@ export function AIAnalysisPanel({
                       View in 3D
                     </button>
 
-                    <button
+                    {/* <button
                       onClick={onSaveResult}
                       className="px-4 py-3 border border-white/30 text-white hover:bg-white hover:text-black transition"
                     >
                       {aiResultSaved ? "Saved" : "Save Result"}
-                    </button>
+                    </button> */}
                   </div>
 
                   {isMapped && (
@@ -211,6 +227,13 @@ export function AIAnalysisPanel({
                     </>
                   )}
                 </>
+              )}
+
+              {aiDetectionResult.stageSource === "default_mapping" && (
+                <p className="text-xs text-yellow-100/70 mt-2">
+                  Stage is suggested from default mapping because the current AI
+                  model detects parasite class only.
+                </p>
               )}
 
               {aiStep === "idle" && (
