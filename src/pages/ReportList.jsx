@@ -41,8 +41,10 @@ export default function ReportsList() {
         setReports([]);
 
         const response = await fetch(`${API_BASE_URL}/reports`, {
-          headers: getAuthHeader(),
-          cache: "no-store",
+          method: "GET",
+          headers: {
+            Authorization: token,
+          },
         });
 
         const data = await response.json();
