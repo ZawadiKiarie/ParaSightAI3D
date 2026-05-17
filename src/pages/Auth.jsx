@@ -3,6 +3,10 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { userAtom } from "../store/Store";
 
+// At the top of Auth.jsx — add this line
+const API_BASE_URL =
+  import.meta.env.VITE_BACKEND_API_URL || "http://localhost:3000";
+
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
@@ -87,7 +91,7 @@ export default function Auth() {
     const password = data.password;
 
     if (validateInputs()) {
-      fetch("http://localhost:3000/register", {
+      fetch(`${API_BASE_URL}/register`, {
         method: "post",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, password }),
@@ -97,7 +101,7 @@ export default function Auth() {
           // console.log(data);
           if (data.success === "true" && data.userId) {
             saveAuthTokenInSession(data.token);
-            fetch(`http://localhost:3000/profile/${data.userId}`, {
+            fetch(`${API_BASE_URL}/profile/${data.userId}`, {
               method: "get",
               headers: {
                 "Content-Type": "application/json",
@@ -127,7 +131,7 @@ export default function Auth() {
     const data = formData;
     const email = data.email;
     const password = data.password;
-    fetch("http://localhost:3000/signin", {
+    fetch(`${API_BASE_URL}/signin`, {
       method: "post",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
@@ -137,7 +141,7 @@ export default function Auth() {
         // console.log(data);
         if (data.success === "true" && data.userId) {
           saveAuthTokenInSession(data.token);
-          fetch(`http://localhost:3000/profile/${data.userId}`, {
+          fetch(`${API_BASE_URL}/profile/${data.userId}`, {
             method: "get",
             headers: {
               "Content-Type": "application/json",
