@@ -5,16 +5,6 @@ import { useEffect, useMemo, useState } from "react";
 const API_BASE_URL =
   import.meta.env.VITE_BACKEND_API_URL || "http://localhost:3000";
 
-const getAuthHeader = () => {
-  const token = window.sessionStorage.getItem("token");
-
-  return token
-    ? {
-        Authorization: `Bearer ${token}`,
-      }
-    : {};
-};
-
 export default function ReportsList() {
   const [reports, setReports] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -26,36 +16,24 @@ export default function ReportsList() {
 
   useEffect(() => {
     const fetchReports = async () => {
-      const token = window.sessionStorage.getItem("token");
-
-      if (!token) {
-        setReports([]);
-        setIsLoading(false);
-        navigate("/auth");
-        return;
-      }
-
       try {
         setIsLoading(true);
         setErrorMsg("");
-        setReports([]);
 
         const response = await fetch(`${API_BASE_URL}/reports`, {
-          headers: getAuthHeader(),
-          cache: "no-store",
+          headers: {
+            Authorization: window.sessionStorage.getItem("token"),
+          },
         });
 
         const data = await response.json();
 
         if (!response.ok) {
-          throw new Error(
-            data.error || data.message || "Failed to fetch reports",
-          );
+          throw new Error(data.error || "Failed to fetch reports");
         }
 
-        setReports(Array.isArray(data) ? data : []);
+        setReports(data);
       } catch (error) {
-        setReports([]);
         setErrorMsg(error.message || "Could not load reports");
       } finally {
         setIsLoading(false);
@@ -63,7 +41,7 @@ export default function ReportsList() {
     };
 
     fetchReports();
-  }, [navigate]);
+  }, []);
 
   const filteredReports = useMemo(() => {
     return reports.filter((report) => {
@@ -257,7 +235,9 @@ export default function ReportsList() {
 
         {!isLoading && filteredReports.length === 0 && (
           <div className="bg-white rounded-lg border border-gray-200 p-12 text-center mt-6">
-            <p className="text-gray-500">No reports found for this user yet.</p>
+            <p className="text-gray-500">
+              No reports found matching your search criteria.
+            </p>
           </div>
         )}
       </div>
