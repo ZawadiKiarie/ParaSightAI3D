@@ -10,7 +10,7 @@ const getAuthHeader = () => {
 
   return token
     ? {
-        Authorization: `Bearer ${token}`,
+        Authorization: token,
       }
     : {};
 };

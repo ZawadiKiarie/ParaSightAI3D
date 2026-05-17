@@ -35,7 +35,7 @@ export function DashboardHeader() {
       await fetch(`${API_BASE_URL}/signout`, {
         method: "GET",
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: token,
         },
       });
     } catch (error) {
