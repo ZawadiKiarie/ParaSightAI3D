@@ -7,7 +7,7 @@ import {
   hoveredMarkerAtom,
   viewAtom,
   focusedMarkerIdAtom,
-} from "../../../../store/store";
+} from "../../../../store/Store";
 import PeripheralCytoplasmMaterial from "../../../shaders/PeripheralCytoplasmMaterial";
 import { createBlastocystisMaterials } from "../../../shaders/BlastocystisMaterials";
 

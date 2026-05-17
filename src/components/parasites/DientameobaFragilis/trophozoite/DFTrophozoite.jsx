@@ -7,7 +7,7 @@ import {
   hoveredMarkerAtom,
   viewAtom,
   focusedMarkerIdAtom,
-} from "../../../../store/store";
+} from "../../../../store/Store";
 import DFOuterMembraneMaterial from "../../../shaders/DFOuterMembraneMaterial";
 import { createDFMaterials } from "../../../shaders/DFMaterials";
 

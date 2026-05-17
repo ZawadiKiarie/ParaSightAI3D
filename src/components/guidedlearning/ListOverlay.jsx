@@ -7,7 +7,7 @@ import {
   hoveredMarkerAtom,
   focusedMarkerIdAtom,
   focusedFeatureIndexAtom,
-} from "../../store/store";
+} from "../../store/Store";
 import { PARASITE_DATA, getAvailableStages } from "../ParasiteConfig";
 import { useEffect, useState } from "react";
 

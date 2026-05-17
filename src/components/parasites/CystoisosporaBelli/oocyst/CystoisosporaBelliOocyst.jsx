@@ -7,7 +7,7 @@ import {
   hoveredMarkerAtom,
   viewAtom,
   focusedMarkerIdAtom,
-} from "../../../../store/store";
+} from "../../../../store/Store";
 import CBOocystBodyMaterial from "../../../shaders/CBOocystBodyMaterial";
 import { createCBMaterials } from "../../../shaders/CBMaterials";
 

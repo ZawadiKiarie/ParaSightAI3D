@@ -7,7 +7,7 @@ import {
   hoveredMarkerAtom,
   viewAtom,
   focusedMarkerIdAtom,
-} from "../../../../store/store";
+} from "../../../../store/Store";
 import OocystBodyMaterial from "../../../shaders/OocystCryptoBodyShader";
 import { createCryptoMaterials } from "../../../shaders/CryptoMaterials";
 

@@ -7,7 +7,7 @@ import {
   hoveredMarkerAtom,
   viewAtom,
   focusedMarkerIdAtom,
-} from "../../../../store/store";
+} from "../../../../store/Store";
 import { EntHistCystCytoplasmMaterial } from "../../../shaders/EntHistCystShader";
 import {
   NuclearEnvelopeMaterial,

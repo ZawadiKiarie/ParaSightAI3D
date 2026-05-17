@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useAtom } from "jotai";
-import { parasiteAtom, stageAtom } from "../../store/store";
+import { parasiteAtom, stageAtom } from "../../store/Store";
 import {
   PARASITE_DATA,
   getAvailableStages,
