@@ -3,6 +3,9 @@ import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ProfileModal } from "./ProfileModal";
 
+const API_BASE_URL =
+  import.meta.env.VITE_BACKEND_API_URL || "http://localhost:3000";
+
 export function DashboardHeader() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
@@ -25,24 +28,26 @@ export function DashboardHeader() {
     };
   }, [isDropdownOpen]);
 
-  const handleLogout = () => {
-    fetch("http://localhost:3000/signout", {
-      method: "get",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: window.sessionStorage.getItem("token"),
-      },
-    })
-      .then((resp) => resp.json())
-      .then((resp) => {
-        if (resp === "success") {
-          window.sessionStorage.removeItem("token");
-          sessionStorage.removeItem("user");
-          navigate("/");
-        }
-      });
-  };
+  const handleLogout = async () => {
+    const token = window.sessionStorage.getItem("token");
 
+    try {
+      await fetch(`${API_BASE_URL}/signout`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+    } catch (error) {
+      console.error("Logout error:", error);
+    } finally {
+      window.sessionStorage.removeItem("token");
+      window.sessionStorage.removeItem("user");
+      window.sessionStorage.clear();
+
+      navigate("/auth", { replace: true });
+    }
+  };
   return (
     <>
       <header className="relative z-20  backdrop-blur-md bg-white/10 border-b border-white/20">

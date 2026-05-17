@@ -3,7 +3,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { userAtom } from "../store/Store";
 
-// At the top of Auth.jsx — add this line
 const API_BASE_URL =
   import.meta.env.VITE_BACKEND_API_URL || "http://localhost:3000";
 

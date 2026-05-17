@@ -3,6 +3,9 @@ import { useEffect, useState } from "react";
 import { useAtom } from "jotai";
 import { userAtom } from "../../store/Store";
 
+const API_BASE_URL =
+  import.meta.env.VITE_BACKEND_API_URL || "http://localhost:3000";
+
 export function ProfileModal({ isOpen, onClose }) {
   const [user, setUser] = useAtom(userAtom);
 
@@ -58,7 +61,7 @@ export function ProfileModal({ isOpen, onClose }) {
 
       const token = sessionStorage.getItem("token");
 
-      const response = await fetch(`http://localhost:3000/profile/${user.id}`, {
+      const response = await fetch(`API_BASE_URL/profile/${user.id}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
