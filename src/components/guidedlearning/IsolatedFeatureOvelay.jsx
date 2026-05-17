@@ -8,7 +8,7 @@ import {
   focusedMarkerIdAtom,
   hoveredMarkerAtom,
   infoSectionAtom,
-} from "../../store/store";
+} from "../../store/Store";
 import { PARASITE_DATA, getAvailableStages } from "../ParasiteConfig";
 import { INFO_SECTIONS, getFeatureContent } from "../../store/FeatureContent";
 
