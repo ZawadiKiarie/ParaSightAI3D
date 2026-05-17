@@ -100,6 +100,9 @@ const runDetectionRequest = async ({
 
   const response = await fetch(`${BACKEND_API_URL}/upload`, {
     method: "POST",
+    headers: {
+      Authorization: window.sessionStorage.getItem("token"),
+    },
     body: formData,
   });
 
