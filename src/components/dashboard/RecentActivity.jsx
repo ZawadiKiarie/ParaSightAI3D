@@ -5,6 +5,16 @@ import { useNavigate } from "react-router-dom";
 const API_BASE_URL =
   import.meta.env.VITE_BACKEND_API_URL || "http://localhost:3000";
 
+const getAuthHeader = () => {
+  const token = window.sessionStorage.getItem("token");
+
+  return token
+    ? {
+        Authorization: `Bearer ${token}`,
+      }
+    : {};
+};
+
 export function RecentActivity() {
   const [activities, setActivities] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -13,22 +23,33 @@ export function RecentActivity() {
 
   useEffect(() => {
     const fetchRecent = async () => {
+      const token = window.sessionStorage.getItem("token");
+
+      if (!token) {
+        setActivities([]);
+        setIsLoading(false);
+        return;
+      }
+
       try {
         setIsLoading(true);
+        setActivities([]);
 
         const response = await fetch(`${API_BASE_URL}/reports/recent?limit=4`, {
-          headers: {
-            Authorization: window.sessionStorage.getItem("token"),
-          },
+          headers: getAuthHeader(),
+          cache: "no-store",
         });
 
         const data = await response.json();
 
         if (response.ok) {
-          setActivities(data);
+          setActivities(Array.isArray(data) ? data : []);
+        } else {
+          setActivities([]);
         }
       } catch (error) {
         console.error("Failed to fetch recent activity:", error);
+        setActivities([]);
       } finally {
         setIsLoading(false);
       }
@@ -87,7 +108,9 @@ export function RecentActivity() {
               className="w-full text-left flex items-start gap-3 pb-4 last:pb-0 border-b border-white/30 last:border-0 hover:opacity-80 transition"
             >
               <div
-                className={`w-2 h-2 rounded-full ${getStatusColor(activity.status)} mt-2`}
+                className={`w-2 h-2 rounded-full ${getStatusColor(
+                  activity.status,
+                )} mt-2`}
               />
 
               <div className="flex-1">
