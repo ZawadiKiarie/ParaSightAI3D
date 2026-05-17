@@ -6,7 +6,7 @@ import {
   focusedFeatureIndexAtom,
   focusedMarkerIdAtom,
   hoveredMarkerAtom,
-} from "../../store/store";
+} from "../../store/Store";
 import { PARASITE_DATA, getAvailableStages } from "../ParasiteConfig";
 import { motion, AnimatePresence } from "motion/react";
 
