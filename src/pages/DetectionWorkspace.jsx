@@ -207,7 +207,7 @@ export function DetectionWorkspace() {
                 )}
               </div>
 
-              <div className="mt-6 p-4 bg-gray-50/50 rounded-lg border border-gray-200">
+              {/* <div className="mt-6 p-4 bg-gray-50/50 rounded-lg border border-gray-200">
                 <div className="flex items-center gap-3">
                   <Camera className="w-5 h-5 text-gray-600" />
                   <div>
@@ -219,7 +219,7 @@ export function DetectionWorkspace() {
                     </p>
                   </div>
                 </div>
-              </div>
+              </div> */}
             </div>
           </div>
 
