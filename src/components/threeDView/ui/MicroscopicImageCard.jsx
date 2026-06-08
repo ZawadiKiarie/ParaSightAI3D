@@ -2,9 +2,6 @@
 
 /**
  * Shows the microscopy image associated with the AI result.
- *
- * For now, this can use a default test image.
- * Later, this image can come directly from the uploaded/captured image.
  */
 export function MicroscopicImageCard({ image, parasiteName, lifeStage }) {
   return (

@@ -1,3 +1,14 @@
+/**
+ * ReportsList.jsx
+ *
+ * Displays the saved AI detection reports for the logged-in user.
+ * It fetches reports from the backend using the saved authentication token,
+ * then allows the user to search and filter reports by status.
+ *
+ * Each report is shown in a table with its ID, date, detected parasite,
+ * confidence score, review status, and a link to open the full report details.
+ */
+
 import { Link, useNavigate } from "react-router-dom";
 import { Search, Filter, ChevronRight, Loader2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";

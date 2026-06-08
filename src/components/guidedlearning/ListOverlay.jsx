@@ -1,3 +1,15 @@
+/**
+ * ListOverlay.jsx
+ *
+ * Main selection overlay for the guided learning view.
+ * It lets users choose a parasite species and view its diagnostic features
+ * based on the currently selected life stage.
+ *
+ * It uses Jotai atoms to update the selected parasite, hovered marker,
+ * focused feature, and current view mode. It also adapts the layout for
+ * desktop and mobile screens.
+ */
+
 import { useAtom, useSetAtom } from "jotai";
 import { motion, AnimatePresence } from "motion/react";
 import {

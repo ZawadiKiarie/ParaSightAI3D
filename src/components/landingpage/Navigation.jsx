@@ -1,3 +1,14 @@
+/**
+ * Navigation.jsx
+ *
+ * Fixed navigation bar for the landing page.
+ * It displays the ParaSightAI logo, simple section links, and a login button.
+ *
+ * Framer Motion is used to animate the navbar when the page loads.
+ * The login button uses React Router navigation to take the user to the
+ * authentication page.
+ */
+
 import { motion } from "motion/react";
 import { LogIn } from "lucide-react";
 import { useNavigate } from "react-router-dom";

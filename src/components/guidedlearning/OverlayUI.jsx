@@ -1,3 +1,14 @@
+/**
+ * OverlayUI.jsx
+ *
+ * Home overlay for the guided learning experience.
+ * It displays the ParaSightAI Lab title, feature highlights, sound toggle,
+ * start button, and project credit text.
+ *
+ * Motion animations are used to fade/slide the overlay out when the user
+ * starts the guided 3D visualization experience.
+ */
+
 import { SoundToggle } from "./SoundToggle";
 import { StartButton } from "./StartExperienceButton";
 import { motion } from "motion/react";

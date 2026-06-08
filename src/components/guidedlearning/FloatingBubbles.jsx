@@ -1,3 +1,14 @@
+/**
+ * FloatingBubbles.jsx
+ *
+ * Creates floating particle/bubble effects for the guided learning 3D scene.
+ * It generates random particle positions and sizes, applies a bubble texture,
+ * and animates the particle field with slow rotation and mouse-based parallax.
+ *
+ * This adds depth, motion, and a microscopic fluid-like atmosphere to the
+ * guided learning environment.
+ */
+
 import React, { useRef, useMemo } from "react";
 import { useFrame, useLoader } from "@react-three/fiber";
 import * as THREE from "three";
@@ -5,8 +16,7 @@ import * as THREE from "three";
 export const FloatingBubbles = ({ count = 50 }) => {
   const points = useRef();
 
-  // 1. Load your bubble/circle texture
-  // Replace './path/to/your/circle.png' with your actual file path
+  // 1. Load bubble/circle texture
   const bubbleTexture = useLoader(
     THREE.TextureLoader,
     "/textures/circle_05.png",
@@ -19,7 +29,7 @@ export const FloatingBubbles = ({ count = 50 }) => {
       positions[i * 3] = (Math.random() - 0.5) * 15;
       positions[i * 3 + 1] = (Math.random() - 0.5) * 10;
       positions[i * 3 + 2] = (Math.random() - 0.5) * 5;
-      randomSizes[i] = Math.random() * 0.4 + 0.1; // Increased size range for visibility
+      randomSizes[i] = Math.random() * 0.4 + 0.1;
     }
     return [positions, randomSizes];
   }, [count]);
@@ -66,7 +76,7 @@ export const FloatingBubbles = ({ count = 50 }) => {
         />
       </bufferGeometry>
       <pointsMaterial
-        map={bubbleTexture} // Use your image here
+        map={bubbleTexture}
         size={0.5} // Control the base size
         color="#a0c4ff"
         transparent={true} // Necessary for PNG transparency

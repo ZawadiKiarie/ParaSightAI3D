@@ -1,3 +1,13 @@
+/**
+ * ExperiencePreview.jsx
+ *
+ * Shows the user journey through ParaSightAI as a simple step-by-step flow:
+ * image upload, AI analysis, 3D visualization, and guided learning.
+ *
+ * It uses reusable data from the flowSteps array to render animated cards,
+ * helping users understand how the platform workflow connects together.
+ */
+
 import { motion } from "motion/react";
 import {
   ArrowRight,

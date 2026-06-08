@@ -1,3 +1,14 @@
+/**
+ * DashboardHeader.jsx
+ *
+ * Header component for the dashboard page.
+ * It displays the ParaSightAI logo, user avatar, dropdown menu,
+ * profile modal trigger, and logout action.
+ *
+ * It also detects clicks outside the dropdown to close it and clears
+ * sessionStorage when the user logs out before redirecting to the auth page.
+ */
+
 import { User, LogOut, UserCircle } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";

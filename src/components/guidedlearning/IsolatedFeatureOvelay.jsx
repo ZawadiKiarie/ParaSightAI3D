@@ -1,3 +1,15 @@
+/**
+ * IsolatedFeature.jsx
+ *
+ * Detailed information overlay for an isolated diagnostic feature.
+ * It displays educational content for the selected parasite feature, including
+ * overview, morphology, diagnostic importance, and related sections.
+ *
+ * It uses Jotai state to know the current parasite, stage, focused feature,
+ * and active information tab, while allowing the user to navigate between
+ * sections or return to the focused feature view.
+ */
+
 import { motion, AnimatePresence } from "motion/react";
 import { useAtomValue, useSetAtom } from "jotai";
 import {

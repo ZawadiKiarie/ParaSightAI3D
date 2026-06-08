@@ -1,3 +1,16 @@
+/**
+ * DetectionWorkspace.jsx
+ *
+ * AI detection upload page.
+ * It allows users to upload or drag-and-drop a microscopy image,
+ * preview the selected image, remove it, and send it to the backend
+ * detection endpoint.
+ *
+ * The image is sent as FormData to the /upload route with the saved
+ * authentication token. After detection, the user is redirected to the
+ * results page with the uploaded image, AI response, and saved report data.
+ */
+
 import { useState, useRef } from "react";
 import { Upload, Camera, FileCheck, Info, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";

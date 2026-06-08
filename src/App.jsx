@@ -1,3 +1,22 @@
+/**
+ * App.jsx
+ *
+ * Main routing file for the ParaSightAI3D frontend.
+ * It uses React Router to connect each URL path to its page component.
+ *
+ * Routes included:
+ * - Landing page
+ * - Authentication page
+ * - Dashboard page
+ * - AI detection upload and results pages
+ * - 3D parasite visualization
+ * - Reports list and report details pages
+ * - Interactive lab simulation
+ * - Guided learning module
+ *
+ * This file only controls navigation between the main sections of the application.
+ */
+
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import Landing from "./pages/Landing";
 import Auth from "./pages/Auth";

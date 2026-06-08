@@ -22,8 +22,6 @@ import { ParasiteModelPreview } from "./ParasiteModelPreview";
  * - environment
  * - OrbitControls
  * - selected parasite model
- * - optional highlight ring
- * - optional cross-section visual plane
  */
 export function ThreeDCanvas({
   parasiteId,

@@ -1,3 +1,15 @@
+/**
+ * DetectionResults.jsx
+ *
+ * Displays the AI detection results after an image is analyzed.
+ * It receives the uploaded image, detection response, and report data through
+ * React Router state from the detection upload page.
+ *
+ * The component draws bounding boxes on a canvas over the microscopy image,
+ * shows detection confidence and parasite details, and provides actions to
+ * view the result in 3D, run another detection, or open the saved report.
+ */
+
 import { useLocation, useNavigate } from "react-router-dom";
 import { ArrowLeft, Box, RotateCcw, AlertCircle } from "lucide-react";
 import { useEffect, useRef, useState } from "react";

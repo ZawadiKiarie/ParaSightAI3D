@@ -1,3 +1,16 @@
+/**
+ * Auth.jsx
+ *
+ * Handles user login and registration for ParaSightAI.
+ * It stores form data,
+ * validates user inputs,
+ * sends sign-in/sign-up requests to the backend,
+ * saves the returned token in sessionStorage, and
+ * loads the authenticated user profile into global state.
+ *
+ * After successful authentication, the user is redirected to the dashboard.
+ */
+
 import { useSetAtom } from "jotai";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";

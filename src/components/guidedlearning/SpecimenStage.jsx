@@ -1,3 +1,14 @@
+/**
+ * SpecimenStage.jsx
+ *
+ * Main 3D specimen display for the guided learning module.
+ * It reads the selected parasite, stage, view mode, and focused feature from
+ * Jotai state, then renders the correct parasite model and diagnostic markers.
+ *
+ * It also handles model positioning, scaling, focus animations, dragging,
+ * zooming, and view-specific transitions using GSAP and React Three Fiber.
+ */
+
 import { useRef, useEffect, useState, useMemo } from "react";
 import { useAtomValue, useSetAtom } from "jotai";
 import {

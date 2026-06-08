@@ -1,3 +1,13 @@
+/**
+ * InteractiveCrosshair.jsx
+ *
+ * Renders a subtle mouse-following crosshair inside the guided learning scene.
+ * It uses the pointer position to smoothly move horizontal and vertical lines,
+ * with a small glowing marker at their intersection.
+ *
+ * This adds an interactive scanning/microscope-like effect to the 3D experience.
+ */
+
 import React, { useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";

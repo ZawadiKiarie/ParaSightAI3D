@@ -1,3 +1,14 @@
+/**
+ * SystemOverview.jsx
+ *
+ * Displays the main modules/features of ParaSightAI on the landing page.
+ * It uses a feature array to render reusable animated cards for the AI detection,
+ * 3D visualization, guided learning, and lab simulation modules.
+ *
+ * This section helps users quickly understand what the system offers before
+ * entering the platform.
+ */
+
 import { motion } from "motion/react";
 import { Brain, Microscope, BookOpen, FlaskConical } from "lucide-react";
 

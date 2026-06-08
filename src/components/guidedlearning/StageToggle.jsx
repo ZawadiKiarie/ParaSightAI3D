@@ -1,3 +1,14 @@
+/**
+ * StageToggle.jsx
+ *
+ * Stage switcher for the guided learning module.
+ * It shows the available life stages for the currently selected parasite
+ * and lets the user switch between them.
+ *
+ * If the current stage is not valid for the selected parasite, it automatically
+ * resets to the first available stage.
+ */
+
 import { useEffect } from "react";
 import { useAtom } from "jotai";
 import { parasiteAtom, stageAtom } from "../../store/Store";

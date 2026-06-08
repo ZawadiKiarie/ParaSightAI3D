@@ -1,3 +1,14 @@
+/**
+ * ModuleGrid.jsx
+ *
+ * Displays the main dashboard module cards.
+ * Each card represents a major ParaSightAI feature: AI Detection,
+ * 3D Visualization, Lab Simulation, and Reports.
+ *
+ * The reusable ModuleCard component shows the icon, description, styling,
+ * and navigation button for each module.
+ */
+
 import { Brain, Box, Microscope, FileText, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 

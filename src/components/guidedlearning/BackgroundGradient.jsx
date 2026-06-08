@@ -1,3 +1,14 @@
+/**
+ * BackgroundGradient.jsx
+ *
+ * Renders the animated shader background for the guided learning scene.
+ * It creates a custom Three.js shader material with soft gradient colors,
+ * organic noise movement, and mouse-responsive animation.
+ *
+ * The component places the shader on a full-screen plane inside the R3F Canvas,
+ * giving the 3D learning module a dynamic microscopic/futuristic background.
+ */
+
 import { shaderMaterial } from "@react-three/drei";
 import { extend, useFrame, useThree } from "@react-three/fiber";
 import { useRef } from "react";

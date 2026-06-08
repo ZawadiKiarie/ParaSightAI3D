@@ -1,4 +1,14 @@
-// src/pages/3DView.jsx
+/**
+ * 3DView.jsx
+ *
+ * Main AI-to-3D visualization page.
+ * It receives AI detection data from the results page, maps it to the correct
+ * parasite model and life stage, then displays the microscopy image,
+ * detection summary, and interactive 3D model preview.
+ *
+ * Most logic is handled by useThreeDViewState, while this file mainly controls
+ * the page layout and connects the 3D view UI components together.
+ */
 
 import { motion } from "motion/react";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -14,7 +24,7 @@ import { ReadyExplorationBanner } from "../components/threeDView/ui/ReadyExplora
 /**
  * 3DView is the standalone AI-to-3D visualization page.
  *
- * This page is now mainly responsible for layout.
+ * This page is mainly responsible for layout.
  *
  * The actual responsibilities are separated:
  * - useThreeDViewState:
@@ -29,22 +39,6 @@ import { ReadyExplorationBanner } from "../components/threeDView/ui/ReadyExplora
  *
  * - threeDView/ui:
  *   renders the visible page sections and controls.
- *
- * You can test manually with props:
- *
- * <ThreeDView parasiteName="Giardia lamblia" initialStage="cyst" />
- *
- * Later, when connecting the AI model, pass:
- *
- * <ThreeDView
- *   aiResult={{
- *     parasiteName: "Giardia lamblia",
- *     stage: "cyst",
- *     confidence: 92,
- *     microscopeImage: "/uploads/result-image.png",
- *     description: "AI detected Giardia lamblia cyst from the uploaded image.",
- *   }}
- * />
  */
 export default function ThreeDView({
   parasiteName = "EntamoebaHystolytica",

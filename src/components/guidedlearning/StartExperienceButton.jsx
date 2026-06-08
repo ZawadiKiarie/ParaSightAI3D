@@ -67,7 +67,6 @@ export const StartButton = () => {
     <button
       ref={buttonRef}
       className="start-btn-container"
-      // 2. Add the click handler to transition to the LIST view
       onClick={() => setView("LIST")}
     >
       <div className="ripple-background">

@@ -11,7 +11,6 @@ import { PARASITE_DATA, STAGE_LABELS } from "../../ParasiteConfig";
  * - zoom slider
  * - internal structure toggle
  * - transparency slider
- * - optional cross-section / highlight toggles
  * - quick focus buttons
  */
 export function ModelControlsPanel({

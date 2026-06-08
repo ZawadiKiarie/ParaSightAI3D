@@ -1,3 +1,14 @@
+/**
+ * RecentActivity.jsx
+ *
+ * Displays the latest detection reports on the dashboard.
+ * It fetches the most recent reports from the backend using the saved
+ * authentication token and stores them in local component state.
+ *
+ * Each activity item shows the parasite detected, confidence score,
+ * relative time, and status color. Clicking an item opens its report details.
+ */
+
 import { Clock, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";

@@ -1,3 +1,16 @@
+/**
+ * HeroSection.jsx
+ *
+ * Main hero section for the landing page.
+ * It introduces ParaSightAI as an AI-powered parasite detection and 3D
+ * visualization platform.
+ *
+ * It includes the main headline, short platform description, call-to-action
+ * button, animated background effects, and a visual preview image.
+ *
+ * The "Enter Platform" button navigates users to the authentication page.
+ */
+
 import { motion } from "motion/react";
 import { ArrowRight, Play } from "lucide-react";
 import { ImageWithFallback } from "./ImageWithFallback";

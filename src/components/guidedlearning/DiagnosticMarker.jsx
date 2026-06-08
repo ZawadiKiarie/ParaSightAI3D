@@ -1,3 +1,14 @@
+/**
+ * DiagnosticMarker.jsx
+ *
+ * Renders clickable diagnostic markers on top of the 3D parasite model.
+ * Each marker represents a parasite feature such as the nucleus, cyst wall,
+ * cytoplasm, or other identifying structure.
+ *
+ * It updates Jotai state when hovered or clicked, allowing the guided learning
+ * view to switch between feature focus mode and isolated feature details.
+ */
+
 import { Html } from "@react-three/drei";
 import { useAtomValue, useSetAtom } from "jotai";
 import {

@@ -1,3 +1,14 @@
+/**
+ * Footer.jsx
+ *
+ * Footer section for the landing page.
+ * It displays the ParaSightAI brand description, platform links,
+ * company links, and basic legal links.
+ *
+ * This component completes the public homepage and gives the app a more
+ * professional landing page structure.
+ */
+
 export function Footer() {
   return (
     <footer className="relative py-12 px-6 border-t border-white/10">

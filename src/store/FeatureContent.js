@@ -1,3 +1,15 @@
+/**
+ * FeatureContent.js
+ *
+ * Stores the educational content used in the isolated feature view.
+ * It defines the information sections shown for each diagnostic feature,
+ * such as overview, recognition, diagnostic value, differential points,
+ * and reporting guidance.
+ *
+ * getFeatureContent() retrieves the correct content for the selected parasite,
+ * life stage, and marker, or returns a fallback template if content is missing.
+ */
+
 export const INFO_SECTIONS = [
   { id: "overview", label: "Overview" },
   { id: "recognition", label: "Recognition" },

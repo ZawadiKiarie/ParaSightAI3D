@@ -1,3 +1,15 @@
+/**
+ * ReportDetails.jsx
+ *
+ * Displays the full details of a selected AI detection report.
+ * It fetches one report from the backend using the report ID in the URL
+ * and the saved authentication token.
+ *
+ * The page shows the detected parasite, confidence score, microscopy image,
+ * sample details, status history, editable clinical notes, confirmation action,
+ * and PDF export option.
+ */
+
 import { useParams, Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,

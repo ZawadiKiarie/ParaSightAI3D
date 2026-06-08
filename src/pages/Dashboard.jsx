@@ -1,3 +1,14 @@
+/**
+ * Dashboard.jsx
+ *
+ * Main page shown after a user logs in.
+ * It displays the dashboard header, a personalized welcome message,
+ * the main module cards, and recent detection activity.
+ *
+ * It reads the logged-in user from Jotai global state and acts as the
+ * central starting point for accessing the app's major features.
+ */
+
 import { useAtomValue } from "jotai";
 import { DashboardHeader } from "../components/dashboard/DashboardHeader";
 import { ModuleGrid } from "../components/dashboard/ModuleGrid";

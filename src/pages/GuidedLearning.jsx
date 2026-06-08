@@ -1,3 +1,14 @@
+/**
+ * GuidedLearning.jsx
+ *
+ * Main page for the guided 3D learning module.
+ * It renders the 3D specimen scene using React Three Fiber and displays
+ * different UI overlays depending on the current view state.
+ *
+ * The page uses Jotai viewAtom to switch between the home overlay,
+ * parasite list, focused feature view, and isolated feature view.
+ */
+
 import { Canvas } from "@react-three/fiber";
 import OverlayUI from "../components/guidedlearning/OverlayUI";
 import { Suspense } from "react";

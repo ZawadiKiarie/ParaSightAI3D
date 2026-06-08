@@ -1,3 +1,14 @@
+/**
+ * Landing.jsx
+ *
+ * Main public landing page for ParaSightAI3D.
+ * It combines the navigation bar, hero section, system overview,
+ * experience preview, and footer into one complete homepage.
+ *
+ * This page introduces the platform before the user logs in and guides
+ * them toward entering the system through the navigation/hero actions.
+ */
+
 import { ExperiencePreview } from "../components/landingpage/ExperiencePreview";
 import { Footer } from "../components/landingpage/Footer";
 import { HeroSection } from "../components/landingpage/HeroSection";

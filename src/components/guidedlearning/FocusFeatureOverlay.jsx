@@ -1,3 +1,14 @@
+/**
+ * FocusFeatureOverlay.jsx
+ *
+ * UI overlay shown when the user focuses on a diagnostic feature.
+ * It displays the selected feature name and provides navigation buttons
+ * to move to the previous or next feature for the current parasite stage.
+ *
+ * It uses Jotai state to update the focused marker/feature and to return
+ * the user back to the full diagnostic feature list.
+ */
+
 import { useAtomValue, useSetAtom } from "jotai";
 import {
   viewAtom,
