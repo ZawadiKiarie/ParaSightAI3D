@@ -31,12 +31,6 @@ export function useLabGuidedAtoms() {
 
   /**
    * Activates isolated feature view for a selected parasite feature.
-   *
-   * Example:
-   * User clicks "Nucleus" in the chamber controls panel
-   * → selected marker ID is stored
-   * → model switches to ISOLATED view
-   * → only the relevant feature/structure is emphasized by the parasite component
    */
   const isolateFeature = useCallback(
     ({ parasiteId, stage, markerId, markerIndex = 0 }) => {
@@ -108,7 +102,7 @@ export function useLabGuidedAtoms() {
 
   /**
    * Fully resets guided-learning atoms.
-   * Use this when restarting or finishing the lab session.
+   * Used when restarting or finishing the lab session.
    */
   const resetGuidedAtoms = useCallback(() => {
     setView("HOME");

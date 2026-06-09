@@ -83,9 +83,6 @@ export const resolveParasiteId = (parasiteNameOrId) => {
 
 /**
  * Gets only the life stages that actually exist for a parasite.
- * Example:
- * Giardia may have trophozoite and cyst.
- * Cryptosporidium may have oocyst only.
  */
 export const getAvailableLabStages = (parasiteId) => {
   const parasite = PARASITE_DATA[parasiteId];

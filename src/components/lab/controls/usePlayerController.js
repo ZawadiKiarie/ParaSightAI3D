@@ -96,11 +96,6 @@ export function usePlayerController({
 
   /**
    * Call this inside useFrame.
-   *
-   * Example:
-   * useFrame((state, delta) => {
-   *   playerController.updatePlayerFrame(state.camera, delta);
-   * });
    */
   const updatePlayerFrame = useCallback(
     (camera, delta) => {

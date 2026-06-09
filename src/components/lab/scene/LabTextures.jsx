@@ -7,8 +7,6 @@ import { LAB_TEXTURES } from "../config/labConstants";
 
 /**
  * Loads and configures all textures used by the lab scene.
- *
- * Keeping texture setup here prevents LabModel.jsx from becoming too crowded.
  */
 export function useLabTextures() {
   const bakedTextures = useTexture({

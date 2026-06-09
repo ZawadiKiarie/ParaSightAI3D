@@ -163,25 +163,7 @@ export function useLabWorkflow({
 
   /**
    * This is the single dynamic result object used by the whole lab.
-   * Later, when the real AI model is connected, aiResult will replace test props.
    */
-  // const aiDetectionResult = useMemo(() => {
-  //   return buildLabDetectionResult(
-  //     aiResult || {
-  //       parasiteName: testParasiteName,
-  //       stage: testStage,
-  //       confidence: testConfidence,
-  //       microscopeImage: testMicroscopeImage,
-  //       location: DEFAULT_LAB_RESULT.location,
-  //     },
-  //   );
-  // }, [
-  //   aiResult,
-  //   testParasiteName,
-  //   testStage,
-  //   testConfidence,
-  //   testMicroscopeImage,
-  // ]);
 
   const [realAIResult, setRealAIResult] = useState(null);
   const [rawDetectionResponse, setRawDetectionResponse] = useState(null);

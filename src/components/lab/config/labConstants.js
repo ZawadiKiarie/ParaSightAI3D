@@ -2,7 +2,6 @@
 
 /**
  * Central constants used by the 3D lab simulation.
- * For example, if the character moves too fast, you only change MOVE_SPEED here.
  */
 
 // Main 3D lab model

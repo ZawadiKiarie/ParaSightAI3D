@@ -90,8 +90,6 @@ export function useLabCollision({ groupRef, colliderRef, characterRef }) {
   /**
    * Converts the capsule's world position back into the character's local position.
    *
-   * This is important because your character is inside the scaled/positioned
-   * LabModel group, so direct world position cannot be assigned blindly.
    */
   const syncCharacterToCollider = useCallback(() => {
     if (!characterRef.current) return;
